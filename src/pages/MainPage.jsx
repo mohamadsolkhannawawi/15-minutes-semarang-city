@@ -1,31 +1,27 @@
 import React from "react";
 import { ArrowRightIcon } from "@heroicons/react/24/solid";
 
-// Pastikan Anda sudah membuat routing, misal dengan React Router
-// import { useNavigate } from 'react-router-dom';
+import semarangBg from "../assets/images/semarang-background.jpg";
 
 const MainPage = ({ onCheckLocation }) => {
-	console.log("MainPage rendered");
-
-	const handleCheckLocation = () => {
-		console.log("Button clicked");
-		if (onCheckLocation) {
-			onCheckLocation();
-		}
-		console.log("Navigasi ke Halaman Peta");
+  const backgroundStyle = {
+		backgroundImage: `url(${semarangBg})`,
 	};
 
 	return (
-		<div className="relative h-screen w-full flex items-center justify-center text-white bg-gradient-to-br from-brand-dark-blue via-brand-medium-blue to-brand-light-blue">
+		<div
+			style={backgroundStyle}
+			className="relative h-screen w-full flex items-center justify-center bg-cover bg-center" // Hapus "bg-main-page-bg"
+		>
 			{/* Overlay Gelap */}
-			<div className="absolute inset-0 bg-black opacity-20"></div>
+			<div className="absolute inset-0 bg-black/50"></div>
 
-			<div className="relative z-10 flex flex-col items-center md:items-start text-center md:text-left max-w-lg mx-4">
+			<div className="relative z-10 flex flex-col items-center text-center max-w-xl mx-4 p-6">
 				<h1 className="text-5xl md:text-7xl font-bold text-white drop-shadow-lg">
 					15 Minute's Semarang City
 				</h1>
 
-				<div className="mt-6 p-4 bg-brand-medium-blue bg-opacity-80 backdrop-blur-sm rounded-lg shadow-xl">
+				<div className="mt-6 p-5 bg-brand-medium-blue/80 backdrop-blur-sm rounded-lg shadow-xl">
 					<p className="text-base md:text-lg text-brand-accent">
 						Program Kota 15-Menit Semarang adalah platform strategis untuk
 						menganalisis kemudahan warga dalam mengakses fasilitas krusial dalam
@@ -37,8 +33,8 @@ const MainPage = ({ onCheckLocation }) => {
 				</div>
 
 				<button
-					onClick={handleCheckLocation}
-					className="mt-8 flex items-center gap-3 px-8 py-4 bg-brand-light-blue text-brand-dark-blue font-bold rounded-full shadow-lg hover:bg-brand-accent transition-colors duration-300 transform hover:scale-105"
+					onClick={onCheckLocation}
+					className="mt-8 flex items-center gap-3 px-8 py-4 bg-brand-accent text-brand-dark-blue font-bold rounded-full shadow-lg hover:bg-white transition-all duration-300 transform hover:scale-105"
 				>
 					Periksa Lokasi Saya
 					<ArrowRightIcon className="h-6 w-6" />

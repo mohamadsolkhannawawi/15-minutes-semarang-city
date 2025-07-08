@@ -1,42 +1,61 @@
 import React from 'react';
 import { Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
+import { useMapZoom } from '../../hooks/useMapZoom';
 
-// Contoh custom icons
-const hospitalIcon = new L.Icon({
-    iconUrl: 'https://cdn-icons-png.flaticon.com/512/3063/3063202.png', // Ganti dengan path ikon lokal Anda
-    iconSize: [35, 35],
-});
+// Fungsi untuk membuat ikon kustom dengan SVG
+const createIcon = (svg) => {
+    return L.divIcon({
+        html: svg,
+        className: 'bg-transparent border-0',
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+    });
+};
 
-const restaurantIcon = new L.Icon({
-    iconUrl: 'https://cdn-icons-png.flaticon.com/512/4331/4331495.png', // Ganti dengan path ikon lokal Anda
-    iconSize: [35, 35],
-});
+// Ikon untuk berbagai tipe fasilitas
+const icons = {
+    hospital: createIcon(`<svg ...>...</svg>`), // Ganti dengan SVG ikon rumah sakit
+    restaurant: createIcon(`<svg ...>...</svg>`), // Ganti dengan SVG ikon restoran
+    park: createIcon(`<svg ...>...</svg>`),
+    school: createIcon(`<svg ...>...</svg>`),
+    shop: createIcon(`<svg ...>...</svg>`),
+    default: new L.Icon.Default(),
+};
 
-const getIcon = (type) => {
-    switch(type) {
-        case 'hospital': return hospitalIcon;
-        case 'restaurant': return restaurantIcon;
-        default: return new L.Icon.Default(); // Ikon default Leaflet
-    }
-}
-
-// Marker yang akan berubah menjadi icon unik saat di-zoom
-const FacilityMarker = ({ facility, onSelect, zoomLevel }) => {
-    const { position, name, type } = facility;
-    
-    // Tampilkan ikon custom jika zoom level cukup dekat
-    const displayIcon = zoomLevel >= 16 ? getIcon(type) : L.divIcon({
+// Ikon titik sederhana untuk saat zoom out
+const createDotIcon = (color) => {
+    return L.divIcon({
         className: 'custom-dot-icon',
-        html: `<div style="background-color:${type === 'hospital' ? 'cyan' : 'purple'}; width: 12px; height: 12px; border-radius: 50%;"></div>`,
+        html: `<div style="background-color:${color}; width: 12px; height: 12px; border-radius: 50%; border: 1px solid white;"></div>`,
         iconSize: [12, 12]
     });
-    
+};
+
+const getIcon = (type, zoomLevel) => {
+    if (zoomLevel < 16) {
+        const color = {
+            hospital: 'deepskyblue', restaurant: 'orange', park: 'limegreen',
+            school: 'gold', shop: 'violet',
+        }[type] || 'gray';
+        return createDotIcon(color);
+    }
+    return icons[type] || icons.default;
+};
+
+const FacilityMarker = ({ facility, onSelect }) => {
+    const { position, name, type } = facility;
+    const zoomLevel = useMapZoom();
+
     return (
-        <Marker position={position} icon={displayIcon}>
+        <Marker position={position} icon={getIcon(type, zoomLevel)}>
             <Popup>
-                {name} <br />
-                <button onClick={() => onSelect(facility)} className="text-blue-500">Lihat Detail</button>
+                <div className="font-sans">
+                    <p className="font-bold m-0">{name}</p>
+                    <button onClick={() => onSelect(facility)} className="text-blue-600 hover:underline text-sm font-semibold">
+                        Lihat Detail
+                    </button>
+                </div>
             </Popup>
         </Marker>
     );

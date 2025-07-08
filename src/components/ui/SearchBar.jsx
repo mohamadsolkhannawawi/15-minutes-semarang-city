@@ -1,33 +1,40 @@
-import React, { useState } from "react";
-import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import React, { useState } from 'react';
+import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/solid';
 
-const SearchBar = ({ onSearch }) => {
-	const [searchQuery, setSearchQuery] = useState("");
+const SearchBar = ({ onSearch, onClear }) => {
+    const [query, setQuery] = useState('');
 
-	const handleSearch = (e) => {
-		e.preventDefault();
-		if (onSearch) {
-			onSearch(searchQuery);
-		}
-	};
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        onSearch(query);
+    };
 
-	return (
-		<form onSubmit={handleSearch} className="relative flex items-center">
-			<input
-				type="text"
-				value={searchQuery}
-				onChange={(e) => setSearchQuery(e.target.value)}
-				placeholder="Cari lokasi atau fasilitas..."
-				className="w-full px-4 py-2 pr-12 text-gray-900 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-light-blue focus:border-transparent"
-			/>
-			<button
-				type="submit"
-				className="absolute right-2 p-2 text-gray-500 hover:text-brand-dark-blue focus:outline-none"
-			>
-				<MagnifyingGlassIcon className="h-5 w-5" />
-			</button>
-		</form>
-	);
+    const handleClear = () => {
+        setQuery('');
+        if (onClear) onClear();
+    };
+
+    return (
+        <form onSubmit={handleSubmit} className="relative">
+            <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Simpang Lima, Semarang"
+                className="w-full pl-5 pr-16 py-3 text-lg text-brand-dark-blue bg-brand-accent rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-brand-light-blue"
+            />
+            <div className="absolute inset-y-0 right-0 flex items-center pr-3">
+                {query && (
+                    <button type="button" onClick={handleClear} className="p-1.5 text-gray-500 hover:text-brand-dark-blue">
+                        <XMarkIcon className="h-6 w-6" />
+                    </button>
+                )}
+                <button type="submit" className="p-1.5 text-gray-500 hover:text-brand-dark-blue">
+                    <MagnifyingGlassIcon className="h-6 w-6" />
+                </button>
+            </div>
+        </form>
+    );
 };
 
 export default SearchBar;

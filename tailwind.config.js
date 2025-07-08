@@ -13,7 +13,7 @@ export default {
 				sans: ["Inter", "sans-serif"], // Ganti jika Anda punya font spesifik
 			},
 			backgroundImage: {
-				"main-page-bg": "url('/src/assets/images/semarang-background.jpg')",
+				// "main-page-bg": "url('/src/assets/semarang-background.jpg')",
 			},
 		},
 	},
