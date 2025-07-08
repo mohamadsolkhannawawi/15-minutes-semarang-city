@@ -1,7 +1,18 @@
 /* Import style dasar Leaflet untuk peta */
-@import 'leaflet/dist/leaflet.css';
+@import "leaflet/dist/leaflet.css";
 
 /* Arahan (directives) Tailwind CSS */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Fallback styles jika Tailwind tidak dimuat */
+.fallback-container {
+	min-height: 100vh;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: linear-gradient(135deg, #2a3a4e 0%, #5b7a9a 50%, #9db2c8 100%);
+	color: white;
+	font-family: system-ui, -apple-system, sans-serif;
+}

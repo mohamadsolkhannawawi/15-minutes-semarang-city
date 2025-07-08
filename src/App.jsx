@@ -1,15 +1,17 @@
-import React, { useState } from 'react';
-import MainPage from './pages/MainPage';
-import MapPage from './pages/MapPage';
+import React, { useState } from "react";
+import MainPage from "./pages/MainPage";
+import MapPage from "./pages/MapPage";
 
 function App() {
-  const [showMap, setShowMap] = useState(false);
+	const [showMap, setShowMap] = useState(false);
 
-  if (showMap) {
-    return <MapPage />;
-  }
+	console.log("App rendered, showMap:", showMap);
 
-  return <MainPage onCheckLocation={() => setShowMap(true)} />;
+	if (showMap) {
+		return <MapPage onBackToMain={() => setShowMap(false)} />;
+	}
+
+	return <MainPage onCheckLocation={() => setShowMap(true)} />;
 }
 
 export default App;
