@@ -1,0 +1,7 @@
+/* Import style dasar Leaflet untuk peta */
+@import 'leaflet/dist/leaflet.css';
+
+/* Arahan (directives) Tailwind CSS */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
