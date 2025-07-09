@@ -8,13 +8,43 @@
 
 /* Custom styles untuk leaflet pop-up agar sesuai tema */
 .leaflet-popup-content-wrapper {
-  @apply rounded-lg bg-white bg-opacity-90 backdrop-blur-sm shadow-lg;
+	@apply rounded-lg bg-white bg-opacity-90 backdrop-blur-sm shadow-lg;
 }
 
 .leaflet-popup-content {
-  @apply text-brand-dark-blue;
+	@apply text-brand-dark-blue;
 }
 
 .leaflet-popup-tip {
-  @apply bg-white bg-opacity-90 backdrop-blur-sm;
+	@apply bg-white bg-opacity-90 backdrop-blur-sm;
+}
+
+/* Custom styles untuk facility icons */
+.custom-facility-icon {
+	filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.3));
+	transition: transform 0.2s ease;
+}
+
+.custom-facility-icon:hover {
+	transform: scale(1.1);
+}
+
+.custom-dot-icon {
+	border: none !important;
+	background: transparent !important;
+}
+
+/* Custom popup styling */
+.custom-popup .leaflet-popup-content-wrapper {
+	border-radius: 12px;
+	box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.custom-popup .leaflet-popup-content {
+	margin: 0;
+	padding: 0;
+}
+
+.custom-popup .leaflet-popup-tip {
+	background: white;
 }
