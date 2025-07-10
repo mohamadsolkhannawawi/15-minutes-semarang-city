@@ -28,8 +28,8 @@ let DefaultIcon = L.icon({
 L.Marker.prototype.options.icon = DefaultIcon;
 const userPinIcon = L.icon({
 	iconUrl: "https://cdn-icons-png.flaticon.com/512/684/684908.png",
-	iconSize: [40, 40],
-	iconAnchor: [20, 40],
+	iconSize: [60, 60],
+	iconAnchor: [30, 60],
 });
 
 const MapPage = () => {
