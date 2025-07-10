@@ -7,6 +7,7 @@ import clsx from "clsx";
 // Import komponen & data
 import SearchBar from "../components/ui/SearchBar";
 import BottomSheet from "../components/ui/BottomSheet";
+import FacilityDetailCard from "../components/ui/FacilityDetailCard";
 import FacilityMarker from "../components/map/FacilityMarker";
 import MapEvents from "../components/map/MapEvents";
 import {
@@ -31,7 +32,7 @@ const userPinIcon = L.icon({
 	iconAnchor: [20, 40],
 });
 
-const MapPage = ({ onBackToMain }) => {
+const MapPage = () => {
 	const [mapCenter, setMapCenter] = useState([-6.9929, 110.4253]);
 	const [userPin, setUserPin] = useState(null); // Pin yang dipilih pengguna
 	const [showResults, setShowResults] = useState(false);
@@ -78,38 +79,55 @@ const MapPage = ({ onBackToMain }) => {
 
 	return (
 		<div className="h-screen w-screen flex flex-col font-sans">
-			<header className="p-4 bg-brand-dark-blue text-white shadow-md z-30">
-				<div className="flex items-center mb-2">
-					{onBackToMain && (
-						<button
-							onClick={onBackToMain}
-							className="mr-3 p-2 bg-brand-light-blue text-brand-dark-blue rounded-lg hover:bg-brand-accent transition-colors"
-						>
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								fill="none"
-								viewBox="0 0 24 24"
-								strokeWidth={1.5}
-								stroke="currentColor"
-								className="w-5 h-5"
-							>
-								<path
-									strokeLinecap="round"
-									strokeLinejoin="round"
-									d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"
-								/>
-							</svg>
-						</button>
-					)}
-					<h1 className="text-xl font-bold flex-grow text-center">
+			<header
+				className="relative shadow-md z-30 flex items-center justify-between px-4 md:px-6 lg:px-8 xl:px-10 2xl:px-12"
+				style={{
+					backgroundColor: "#213448",
+					opacity: "1",
+					height: "clamp(80px, 10.76vh, 155px)",
+					maxWidth: "100vw",
+					width: "100%",
+				}}
+			>
+				{/* Container untuk layout responsif */}
+				<div
+					className="w-full flex items-center justify-between"
+					style={{ gap: "clamp(16px, 2.78vw, 40px)" }}
+				>
+					{/* Judul di kiri */}
+					<h1
+						className="font-bold flex items-center font-poppins flex-shrink-0"
+						style={{
+							fontWeight: "700",
+							color: "#ECEFCA",
+							opacity: "1",
+							display: "flex",
+							alignItems: "center",
+							lineHeight: "1.1",
+							fontSize: "clamp(16px, 2.78vw, 40px)",
+							width: "clamp(180px, 22.22vw, 320px)",
+							height: "clamp(auto, 7.64vh, 110px)",
+							wordBreak: "break-word",
+							hyphens: "auto",
+						}}
+					>
 						15 Minute's Semarang City
 					</h1>
-				</div>
-				<div className="max-w-md mx-auto">
-					<SearchBar
-						onSearch={(q) => console.log("Search:", q)}
-						onClear={() => console.log("Clear search")}
-					/>
+
+					{/* Search Bar di kanan */}
+					<div
+						className="flex-shrink-0"
+						style={{
+							width: "clamp(200px, 52.78vw, 760px)",
+							maxWidth: "760px",
+							minWidth: "200px",
+						}}
+					>
+						<SearchBar
+							onSearch={(q) => console.log("Search:", q)}
+							onClear={() => console.log("Clear search")}
+						/>
+					</div>
 				</div>
 			</header>
 
@@ -149,13 +167,21 @@ const MapPage = ({ onBackToMain }) => {
 				{/* Initial State UI (Output-Page-Awal) */}
 				<div
 					className={clsx(
-						"absolute bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col gap-4 w-11/12 max-w-sm transition-opacity duration-300",
+						"absolute bottom-4 sm:bottom-6 lg:bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col gap-3 sm:gap-4 transition-opacity duration-300",
 						{ "opacity-0 pointer-events-none": showResults }
 					)}
+					style={{
+						width: "clamp(280px, 80vw, 450px)",
+						maxWidth: "90vw",
+					}}
 				>
 					<button
 						onClick={handleUseMyLocation}
-						className="w-full py-4 px-6 bg-brand-light-blue text-brand-dark-blue font-semibold rounded-xl shadow-lg hover:bg-white transition-all duration-200 flex items-center justify-center gap-3 text-base"
+						className="w-full py-3 sm:py-4 px-4 sm:px-6 bg-brand-light-blue text-brand-dark-blue font-semibold rounded-xl shadow-lg hover:bg-white transition-all duration-200 flex items-center justify-center gap-2 sm:gap-3 font-poppins"
+						style={{
+							fontSize: "clamp(14px, 1.1vw, 16px)",
+							height: "clamp(50px, 4vh, 60px)",
+						}}
 					>
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
@@ -163,7 +189,7 @@ const MapPage = ({ onBackToMain }) => {
 							viewBox="0 0 24 24"
 							strokeWidth={1.5}
 							stroke="currentColor"
-							className="w-6 h-6"
+							className="w-5 h-5 sm:w-6 sm:h-6"
 						>
 							<path
 								strokeLinecap="round"
@@ -180,7 +206,11 @@ const MapPage = ({ onBackToMain }) => {
 					</button>
 					<button
 						onClick={handleCheckFacilities}
-						className="w-full py-4 px-6 bg-brand-accent text-brand-dark-blue font-semibold rounded-xl shadow-lg hover:bg-white transition-all duration-200 flex items-center justify-center gap-3 text-base"
+						className="w-full py-3 sm:py-4 px-4 sm:px-6 bg-brand-accent text-brand-dark-blue font-semibold rounded-xl shadow-lg hover:bg-white transition-all duration-200 flex items-center justify-center gap-2 sm:gap-3 font-poppins"
+						style={{
+							fontSize: "clamp(14px, 1.1vw, 16px)",
+							height: "clamp(50px, 4vh, 60px)",
+						}}
 					>
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
@@ -188,7 +218,7 @@ const MapPage = ({ onBackToMain }) => {
 							viewBox="0 0 24 24"
 							strokeWidth={1.5}
 							stroke="currentColor"
-							className="w-6 h-6"
+							className="w-5 h-5 sm:w-6 sm:h-6"
 						>
 							<path
 								strokeLinecap="round"
@@ -199,44 +229,11 @@ const MapPage = ({ onBackToMain }) => {
 						Cari Fasilitas Publik
 					</button>
 				</div>
-
 				{/* Facility Detail Card (Output-Page-Zoom-Area) */}
-				{selectedFacility && (
-					<div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 p-4 bg-white/90 backdrop-blur-md rounded-lg shadow-xl w-11/12 max-w-sm">
-						<button
-							onClick={() => setSelectedFacility(null)}
-							className="absolute top-2 right-2 text-gray-500 hover:text-black"
-						>
-							<svg
-								className="h-6 w-6"
-								fill="none"
-								viewBox="0 0 24 24"
-								stroke="currentColor"
-							>
-								<path
-									strokeLinecap="round"
-									strokeLinejoin="round"
-									strokeWidth={2}
-									d="M6 18L18 6M6 6l12 12"
-								/>
-							</svg>
-						</button>
-						<h3 className="font-bold text-lg text-brand-dark-blue">
-							{selectedFacility.name}
-						</h3>
-						<div className="text-sm text-gray-700 mt-2 space-y-1">
-							<p>
-								<b>Alamat:</b> {selectedFacility.address}
-							</p>
-							<p>
-								<b>Kontak:</b> {selectedFacility.contact}
-							</p>
-							<p>
-								<b>Jam Kerja:</b> {selectedFacility.hours}
-							</p>
-						</div>
-					</div>
-				)}
+				<FacilityDetailCard
+					facility={selectedFacility}
+					onClose={() => setSelectedFacility(null)}
+				/>
 
 				<BottomSheet
 					isVisible={showResults && !selectedFacility}

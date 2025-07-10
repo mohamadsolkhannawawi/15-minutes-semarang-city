@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { XMarkIcon } from "@heroicons/react/24/solid";
 
 const SearchBar = ({ onSearch, onClear }) => {
 	const [query, setQuery] = useState("");
@@ -15,27 +14,66 @@ const SearchBar = ({ onSearch, onClear }) => {
 	};
 
 	return (
-		<form onSubmit={handleSubmit} className="relative">
+		<form onSubmit={handleSubmit} className="relative w-full max-w-full">
 			<input
 				type="text"
 				value={query}
 				onChange={(e) => setQuery(e.target.value)}
-				placeholder="Simpang Lima, Semarang"
-				className="w-full pl-5 pr-16 py-3 text-lg text-brand-dark-blue bg-brand-accent rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-brand-light-blue"
+				placeholder={query ? "" : "Telusuri Lokasi"}
+				className="w-full rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-light-blue focus:ring-opacity-50 transition-all duration-200 font-poppins"
+				style={{
+					height: "clamp(60px, 5.5vh, 80px)",
+					backgroundColor: "#ECEFCA",
+					color: "#213448",
+					fontWeight: "500",
+					fontSize: "clamp(16px, 1.4vw, 20px)",
+					paddingLeft: "clamp(20px, 2.2vw, 32px)",
+					paddingRight: query
+						? "clamp(80px, 7vw, 100px)"
+						: "clamp(50px, 4.2vw, 60px)",
+					border: "none",
+					outline: "none",
+					opacity: "1",
+				}}
 			/>
-			<div className="absolute inset-y-0 right-0 flex items-center pr-3">
+			<div className="absolute inset-y-0 right-0 flex items-center pr-3 md:pr-4">
 				{query && (
 					<button
 						type="button"
 						onClick={handleClear}
-						className="p-1.5 text-gray-500 hover:text-brand-dark-blue"
+						className="text-gray-600 hover:text-brand-dark-blue transition-colors duration-200 mr-2 md:mr-3"
+						style={{
+							width: "clamp(24px, 2.1vw, 30px)",
+							height: "clamp(24px, 2.1vw, 30px)",
+							padding: "0",
+						}}
+						aria-label="Clear search"
 					>
-						<XMarkIcon className="h-6 w-6" />
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							fill="none"
+							viewBox="0 0 24 24"
+							strokeWidth={1.5}
+							stroke="currentColor"
+							className="w-full h-full"
+						>
+							<path
+								strokeLinecap="round"
+								strokeLinejoin="round"
+								d="M6 18 18 6M6 6l12 12"
+							/>
+						</svg>
 					</button>
 				)}
 				<button
 					type="submit"
-					className="p-1.5 text-gray-500 hover:text-brand-dark-blue"
+					className="text-gray-600 hover:text-brand-dark-blue transition-colors duration-200"
+					style={{
+						width: "clamp(24px, 2.1vw, 30px)",
+						height: "clamp(24px, 2.1vw, 30px)",
+						padding: "0",
+					}}
+					aria-label="Search"
 				>
 					<svg
 						xmlns="http://www.w3.org/2000/svg"
@@ -43,12 +81,12 @@ const SearchBar = ({ onSearch, onClear }) => {
 						viewBox="0 0 24 24"
 						strokeWidth={1.5}
 						stroke="currentColor"
-						className="h-6 w-6"
+						className="w-full h-full"
 					>
 						<path
 							strokeLinecap="round"
 							strokeLinejoin="round"
-							d="m15.75 15.75-2.489-2.489m0 0a3.375 3.375 0 1 0-4.773-4.773 3.375 3.375 0 0 0 4.774 4.774ZM21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+							d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z"
 						/>
 					</svg>
 				</button>

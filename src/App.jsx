@@ -8,7 +8,7 @@ function App() {
 	console.log("App rendered, showMap:", showMap);
 
 	if (showMap) {
-		return <MapPage onBackToMain={() => setShowMap(false)} />;
+		return <MapPage />;
 	}
 
 	return <MainPage onCheckLocation={() => setShowMap(true)} />;

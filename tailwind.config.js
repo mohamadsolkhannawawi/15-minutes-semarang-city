@@ -10,7 +10,17 @@ export default {
 				"brand-accent": "#F0EAD6",
 			},
 			fontFamily: {
-				sans: ["Inter", "sans-serif"], // Ganti jika Anda punya font spesifik
+				sans: ["Inter", "sans-serif"],
+				poppins: ["Poppins", "sans-serif"],
+			},
+			screens: {
+				xs: "480px",
+				sm: "640px",
+				md: "768px",
+				lg: "1024px",
+				xl: "1280px",
+				"2xl": "1536px",
+				"3xl": "1920px",
 			},
 			backgroundImage: {
 				// "main-page-bg": "url('/src/assets/semarang-background.jpg')",

@@ -1,56 +1,137 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React from "react";
 
-const BottomSheet = ({ isVisible, facilities, geoInfo, onFacilitySelect, onClose }) => {
-  return (
-    <motion.div
-      drag="y"
-      dragConstraints={{ top: 0, bottom: 500 }} // Batas drag
-      dragElastic={0.2}
-      onDragEnd={(event, info) => {
-        if (info.offset.y > 150) onClose(); // Tutup jika digeser ke bawah
-      }}
-      initial={{ y: '100%' }}
-      animate={{ y: isVisible ? 0 : '100%' }}
-      transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-      className="absolute bottom-0 left-0 right-0 z-20 mx-auto w-full max-w-2xl"
-    >
-      <div className="bg-white/80 backdrop-blur-md rounded-t-2xl max-h-[85vh] flex flex-col shadow-2xl">
-        <div className="w-full py-3 flex justify-center cursor-grab active:cursor-grabbing">
-          <div className="w-12 h-1.5 bg-gray-400 rounded-full"></div>
-        </div>
+// Import semua icon SVG lokal
+import BandaraIcon from "../../assets/icons/Bandara.svg";
+import GerejaIcon from "../../assets/icons/Gereja.svg";
+import KesehatanIcon from "../../assets/icons/Kesehatan.svg";
+import KlentengIcon from "../../assets/icons/Klenteng.svg";
+import MasjidIcon from "../../assets/icons/Masjid.svg";
+import PemerintahIcon from "../../assets/icons/Pemerintah.svg";
+import PendidikanIcon from "../../assets/icons/Pendidikan.svg";
+import PerpustakaanIcon from "../../assets/icons/Perpustakaan.svg";
+import PuraIcon from "../../assets/icons/Pura.svg";
+import RestoranIcon from "../../assets/icons/Restoran.svg";
+import StasiunIcon from "../../assets/icons/Stasiun.svg";
+import TamanIcon from "../../assets/icons/Taman.svg";
+import TerminalIcon from "../../assets/icons/Terminal.svg";
+import TokoIcon from "../../assets/icons/Toko.svg";
+import ViharaIcon from "../../assets/icons/Vihara.svg";
 
-        <div className="px-6 pb-4 flex-shrink-0">
-          <h2 className="text-xl font-bold text-brand-dark-blue">{facilities.length} Fasilitas Publik Ditemukan</h2>
-        </div>
+// Mapping icon berdasarkan tipe fasilitas
+const getIconForType = (type) => {
+	const iconMap = {
+		bandara: BandaraIcon,
+		gereja: GerejaIcon,
+		kesehatan: KesehatanIcon,
+		klenteng: KlentengIcon,
+		masjid: MasjidIcon,
+		pemerintah: PemerintahIcon,
+		pendidikan: PendidikanIcon,
+		perpustakaan: PerpustakaanIcon,
+		pura: PuraIcon,
+		restoran: RestoranIcon,
+		stasiun: StasiunIcon,
+		taman: TamanIcon,
+		terminal: TerminalIcon,
+		toko: TokoIcon,
+		vihara: ViharaIcon,
+		// Aliases
+		hospital: KesehatanIcon,
+		church: GerejaIcon,
+		mosque: MasjidIcon,
+		temple: KlentengIcon,
+		school: PendidikanIcon,
+		restaurant: RestoranIcon,
+		shop: TokoIcon,
+		park: TamanIcon,
+		library: PerpustakaanIcon,
+		government: PemerintahIcon,
+		station: StasiunIcon,
+	};
 
-        <div className="overflow-y-auto px-6 flex-grow">
-          <ul className="divide-y divide-gray-200">
-            {facilities.map((facility, index) => (
-              <li key={facility.id} className="py-3">
-                <a href="#" onClick={(e) => { e.preventDefault(); onFacilitySelect(facility); }}
-                  className="group flex items-center gap-4">
-                  <span className="flex-shrink-0 w-6 text-center font-semibold text-gray-500">{index + 1}.</span>
-                  <span className="flex-grow text-blue-600 group-hover:underline">{facility.name}</span>
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
+	return iconMap[type] || KesehatanIcon;
+};
 
-        <div className="mt-auto p-6 border-t border-gray-300 bg-brand-accent/30 flex-shrink-0">
-          <button className="w-full py-3 px-4 bg-brand-accent text-brand-dark-blue font-semibold rounded-lg shadow-lg mb-4 hover:bg-white transition-colors">
-            Detail Informasi Geografis
-          </button>
-          <div className="text-sm text-gray-700 space-y-1">
-            <p><b>Kepadatan Penduduk:</b> {geoInfo.populationDensity}</p>
-            <p><b>Kelurahan:</b> {geoInfo.kelurahan}</p>
-            <p><b>Kecamatan:</b> {geoInfo.kecamatan}</p>
-          </div>
-        </div>
-      </div>
-    </motion.div>
-  );
+const BottomSheet = ({ isVisible, facilities, geoInfo, onFacilitySelect }) => {
+	return (
+		<div
+			className={`absolute bottom-0 left-0 right-0 z-20 mx-auto w-full max-w-2xl transition-transform duration-300 ${
+				isVisible ? "translate-y-0" : "translate-y-full"
+			}`}
+		>
+			<div className="bg-white/80 backdrop-blur-md rounded-t-2xl max-h-[85vh] flex flex-col shadow-2xl">
+				<div className="w-full py-3 flex justify-center cursor-grab active:cursor-grabbing">
+					<div className="w-12 h-1.5 bg-gray-400 rounded-full"></div>
+				</div>
+
+				<div className="px-6 pb-4 flex-shrink-0">
+					<h2 className="text-xl font-bold text-brand-dark-blue">
+						{facilities.length} Fasilitas Publik Ditemukan
+					</h2>
+				</div>
+
+				<div className="overflow-y-auto px-6 flex-grow">
+					<ul className="divide-y divide-gray-200">
+						{facilities.map((facility, index) => (
+							<li key={facility.id} className="py-3">
+								<a
+									href="#"
+									onClick={(e) => {
+										e.preventDefault();
+										onFacilitySelect(facility);
+									}}
+									className="group flex items-center gap-4 hover:bg-gray-50 p-2 rounded-lg transition-colors"
+								>
+									<span className="flex-shrink-0 w-6 text-center font-semibold text-gray-500">
+										{index + 1}.
+									</span>
+									<img
+										src={getIconForType(facility.type)}
+										alt={facility.type}
+										className="w-6 h-6 object-contain flex-shrink-0"
+									/>
+									<span className="flex-grow text-blue-600 group-hover:underline font-medium">
+										{facility.name}
+									</span>
+									<svg
+										xmlns="http://www.w3.org/2000/svg"
+										fill="none"
+										viewBox="0 0 24 24"
+										strokeWidth={1.5}
+										stroke="currentColor"
+										className="w-5 h-5 text-gray-400 group-hover:text-blue-600 transition-colors"
+									>
+										<path
+											strokeLinecap="round"
+											strokeLinejoin="round"
+											d="m8.25 4.5 7.5 7.5-7.5 7.5"
+										/>
+									</svg>
+								</a>
+							</li>
+						))}
+					</ul>
+				</div>
+
+				<div className="mt-auto p-6 border-t border-gray-300 bg-brand-accent/30 flex-shrink-0">
+					<button className="w-full py-3 px-4 bg-brand-accent text-brand-dark-blue font-semibold rounded-lg shadow-lg mb-4 hover:bg-white transition-colors">
+						Detail Informasi Geografis
+					</button>
+					<div className="text-sm text-gray-700 space-y-1">
+						<p>
+							<b>Kepadatan Penduduk:</b> {geoInfo.populationDensity}
+						</p>
+						<p>
+							<b>Kelurahan:</b> {geoInfo.kelurahan}
+						</p>
+						<p>
+							<b>Kecamatan:</b> {geoInfo.kecamatan}
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+	);
 };
 
 export default BottomSheet;
