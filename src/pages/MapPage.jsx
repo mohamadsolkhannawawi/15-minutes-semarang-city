@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { MapContainer, TileLayer, Marker, Polygon } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -34,13 +34,21 @@ const userPinIcon = L.icon({
 
 const MapPage = () => {
 	const [mapCenter, setMapCenter] = useState([-6.9929, 110.4253]);
-	const [userPin, setUserPin] = useState(null); // Pin yang dipilih pengguna
+	const [userPin, setUserPin] = useState(null);
 	const [showResults, setShowResults] = useState(false);
 	const [facilities] = useState(dummyFacilities);
 	const [selectedFacility, setSelectedFacility] = useState(null);
+	const [activeFilter, setActiveFilter] = useState("all");
+
+	const filteredFacilities = useMemo(() => {
+		if (activeFilter === "all") {
+			return facilities;
+		}
+		return facilities.filter((facility) => facility.type === activeFilter);
+	}, [activeFilter, facilities]);
 
 	const handleMapClick = (latlng) => {
-		if (showResults) return; // Jangan letakkan pin baru jika hasil sudah ditampilkan
+		if (showResults) return;
 		setUserPin(latlng);
 		setSelectedFacility(null);
 	};
@@ -74,7 +82,7 @@ const MapPage = () => {
 	const resetView = () => {
 		setShowResults(false);
 		setSelectedFacility(null);
-		// Jangan hapus userPin agar user tahu titik awal pencariannya
+		setActiveFilter("all");
 	};
 
 	return (
@@ -83,38 +91,29 @@ const MapPage = () => {
 				className="relative shadow-md z-30 flex items-center justify-between px-4 md:px-6 lg:px-8 xl:px-10 2xl:px-12"
 				style={{
 					backgroundColor: "#213448",
-					opacity: "1",
-					height: "clamp(80px, 10.76vh, 155px)",
-					maxWidth: "100vw",
-					width: "100%",
+					// (PENYESUAIAN) Nilai height diubah untuk menambah tinggi navbar
+					height: "clamp(90px, 12vh, 165px)",
+					boxSizing: "border-box",
 				}}
 			>
-				{/* Container untuk layout responsif */}
 				<div
 					className="w-full flex items-center justify-between"
 					style={{ gap: "clamp(16px, 2.78vw, 40px)" }}
 				>
-					{/* Judul di kiri */}
 					<h1
 						className="font-bold flex items-center font-poppins flex-shrink-0"
 						style={{
 							fontWeight: "700",
 							color: "#ECEFCA",
-							opacity: "1",
-							display: "flex",
-							alignItems: "center",
 							lineHeight: "1.1",
-							fontSize: "clamp(16px, 2.78vw, 40px)",
+							fontSize: "clamp(16px, 2.2vw, 32px)",
 							width: "clamp(180px, 22.22vw, 320px)",
-							height: "clamp(auto, 7.64vh, 110px)",
 							wordBreak: "break-word",
-							hyphens: "auto",
 						}}
 					>
 						15 Minute's Semarang City
 					</h1>
 
-					{/* Search Bar di kanan */}
 					<div
 						className="flex-shrink-0"
 						style={{
@@ -153,7 +152,7 @@ const MapPage = () => {
 								}}
 								positions={dummyIsochrone}
 							/>
-							{facilities.map((facility) => (
+							{filteredFacilities.map((facility) => (
 								<FacilityMarker
 									key={facility.id}
 									facility={facility}
@@ -164,7 +163,6 @@ const MapPage = () => {
 					)}
 				</MapContainer>
 
-				{/* Initial State UI (Output-Page-Awal) */}
 				<div
 					className={clsx(
 						"absolute bottom-4 sm:bottom-6 lg:bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col gap-3 sm:gap-4 transition-opacity duration-300",
@@ -229,7 +227,7 @@ const MapPage = () => {
 						Cari Fasilitas Publik
 					</button>
 				</div>
-				{/* Facility Detail Card (Output-Page-Zoom-Area) */}
+
 				<FacilityDetailCard
 					facility={selectedFacility}
 					onClose={() => setSelectedFacility(null)}
@@ -237,9 +235,12 @@ const MapPage = () => {
 
 				<BottomSheet
 					isVisible={showResults && !selectedFacility}
-					facilities={facilities}
+					facilities={filteredFacilities}
+					allFacilities={facilities}
 					geoInfo={dummyGeographicInfo}
 					onFacilitySelect={handleFacilitySelect}
+					activeFilter={activeFilter}
+					onFilterChange={setActiveFilter}
 					onClose={resetView}
 				/>
 			</main>
