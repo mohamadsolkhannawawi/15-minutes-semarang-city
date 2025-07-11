@@ -22,12 +22,12 @@ const SearchBar = ({ onSearch, onClear }) => {
 				placeholder={query ? "" : "Telusuri Lokasi"}
 				className="w-full rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-light-blue focus:ring-opacity-50 transition-all duration-200 font-poppins"
 				style={{
-					height: "clamp(60px, 5.5vh, 80px)",
+					height: "clamp(40px, 4.5vh, 60px)",
 					backgroundColor: "#ECEFCA",
 					color: "#213448",
 					fontWeight: "500",
-					fontSize: "clamp(16px, 1.4vw, 20px)",
-					paddingLeft: "clamp(20px, 2.2vw, 32px)",
+					fontSize: "clamp(16px, 1.2vw, 20px)",
+					paddingLeft: "clamp(20px, 1.5vw, 32px)",
 					paddingRight: query
 						? "clamp(80px, 7vw, 100px)"
 						: "clamp(50px, 4.2vw, 60px)",
@@ -43,8 +43,8 @@ const SearchBar = ({ onSearch, onClear }) => {
 						onClick={handleClear}
 						className="text-gray-600 hover:text-brand-dark-blue transition-colors duration-200 mr-2 md:mr-3"
 						style={{
-							width: "clamp(24px, 2.1vw, 30px)",
-							height: "clamp(24px, 2.1vw, 30px)",
+							width: "clamp(16px, 1.5vw, 24px)",
+							height: "clamp(16px, 1.5vw, 24px)",
 							padding: "0",
 						}}
 						aria-label="Clear search"
@@ -69,8 +69,8 @@ const SearchBar = ({ onSearch, onClear }) => {
 					type="submit"
 					className="text-gray-600 hover:text-brand-dark-blue transition-colors duration-200"
 					style={{
-						width: "clamp(24px, 2.1vw, 30px)",
-						height: "clamp(24px, 2.1vw, 30px)",
+						width: "clamp(16px, 1.5vw, 24px)",
+						height: "clamp(16px, 1.5vw, 24px)",
 						padding: "0",
 					}}
 					aria-label="Search"

@@ -92,7 +92,7 @@ const MapPage = () => {
 				style={{
 					backgroundColor: "#213448",
 					// (PENYESUAIAN) Nilai height diubah untuk menambah tinggi navbar
-					height: "clamp(90px, 12vh, 165px)",
+					height: "clamp(65px, 9vh, 110px)",
 					boxSizing: "border-box",
 				}}
 			>
@@ -105,9 +105,9 @@ const MapPage = () => {
 						style={{
 							fontWeight: "700",
 							color: "#ECEFCA",
-							lineHeight: "1.1",
-							fontSize: "clamp(16px, 2.2vw, 32px)",
-							width: "clamp(180px, 22.22vw, 320px)",
+							lineHeight: "1",
+							fontSize: "clamp(14px, 2vw, 24px)",
+							width: "clamp(240px, 15vw, 400px)",
 							wordBreak: "break-word",
 						}}
 					>
