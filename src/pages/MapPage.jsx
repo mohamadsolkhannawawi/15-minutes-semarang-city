@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import { MapContainer, TileLayer, Marker, Polygon } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -39,7 +39,7 @@ const MapPage = () => {
 	const [facilities] = useState(dummyFacilities);
 	const [selectedFacility, setSelectedFacility] = useState(null);
 	const [activeFilter, setActiveFilter] = useState("all");
-
+	const mapRef = useRef(null);
 	const filteredFacilities = useMemo(() => {
 		if (activeFilter === "all") {
 			return facilities;
@@ -62,6 +62,11 @@ const MapPage = () => {
 			setMapCenter([myLocation.lat, myLocation.lng]);
 			setUserPin(myLocation);
 			setSelectedFacility(null);
+			if (mapRef.current) {
+				setTimeout(() => {
+					mapRef.current.flyTo([myLocation.lat, myLocation.lng], 16);
+				});
+			}
 		});
 	};
 
@@ -136,6 +141,7 @@ const MapPage = () => {
 					zoom={15}
 					scrollWheelZoom={true}
 					className="h-full w-full z-0"
+					ref={mapRef}
 				>
 					<TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 					<MapEvents onMapClick={handleMapClick} />
@@ -169,7 +175,7 @@ const MapPage = () => {
 						{ "opacity-0 pointer-events-none": showResults }
 					)}
 					style={{
-						width: "clamp(280px, 80vw, 450px)",
+						width: "clamp(280px, 80vw, 300px)",
 						maxWidth: "90vw",
 					}}
 				>
