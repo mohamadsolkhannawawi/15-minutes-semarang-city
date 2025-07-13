@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import { MapContainer, TileLayer, Marker, Polygon } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -33,12 +33,15 @@ const userPinIcon = L.icon({
 });
 
 const MapPage = () => {
-	const [mapCenter, setMapCenter] = useState([-6.9929, 110.4253]);
+	// Lokasi Deafult Simpang Lima 
+	const SIMPANG_LIMA_COORDS = [-6.9904397128823295, 110.42294902766812];
+	const [mapCenter, setMapCenter] = useState(SIMPANG_LIMA_COORDS);
 	const [userPin, setUserPin] = useState(null);
 	const [showResults, setShowResults] = useState(false);
 	const [facilities] = useState(dummyFacilities);
 	const [selectedFacility, setSelectedFacility] = useState(null);
 	const [activeFilter, setActiveFilter] = useState("all");
+	const mapRef = useRef(null);
 
 	const filteredFacilities = useMemo(() => {
 		if (activeFilter === "all") {
@@ -54,15 +57,30 @@ const MapPage = () => {
 	};
 
 	const handleUseMyLocation = () => {
-		navigator.geolocation.getCurrentPosition((position) => {
-			const myLocation = {
-				lat: position.coords.latitude,
-				lng: position.coords.longitude,
-			};
-			setMapCenter([myLocation.lat, myLocation.lng]);
-			setUserPin(myLocation);
-			setSelectedFacility(null);
-		});
+		// Di non aktifkan untuk nanti saat data sudah siap
+		// navigator.geolocation.getCurrentPosition((position) => {
+		// 	const myLocation = {
+		// 		lat: position.coords.latitude,
+		// 		lng: position.coords.longitude,
+		// 	};
+		// 	setMapCenter([myLocation.lat, myLocation.lng]);
+		// 	setUserPin(myLocation);
+		// 	setSelectedFacility(null);
+		// });
+		const defaultLocation = {
+			lat: SIMPANG_LIMA_COORDS[0],
+			lng: SIMPANG_LIMA_COORDS[1],
+		};
+
+		setMapCenter(SIMPANG_LIMA_COORDS);
+		setUserPin(defaultLocation);
+		setSelectedFacility(null);
+
+		if (mapRef.current) {
+			setTimeout (() => {
+				mapRef.current.flyTo(SIMPANG_LIMA_COORDS, 16);
+			}, 100)
+		} 
 	};
 
 	const handleCheckFacilities = () => {
@@ -136,6 +154,7 @@ const MapPage = () => {
 					zoom={15}
 					scrollWheelZoom={true}
 					className="h-full w-full z-0"
+					ref={mapRef}
 				>
 					<TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
 					<MapEvents onMapClick={handleMapClick} />
