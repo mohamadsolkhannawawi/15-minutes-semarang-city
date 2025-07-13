@@ -169,7 +169,7 @@ const MapPage = () => {
 						{ "opacity-0 pointer-events-none": showResults }
 					)}
 					style={{
-						width: "clamp(280px, 80vw, 450px)",
+						width: "clamp(280px, 80vw, 300px)",
 						maxWidth: "90vw",
 					}}
 				>
