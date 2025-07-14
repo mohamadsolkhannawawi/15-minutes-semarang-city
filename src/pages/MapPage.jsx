@@ -7,6 +7,7 @@ import clsx from "clsx";
 // Import komponen & data
 import SearchBar from "../components/ui/SearchBar";
 import BottomSheet from "../components/ui/BottomSheet";
+import SidePanel from "../components/ui/SidePanel";
 import FacilityDetailCard from "../components/ui/FacilityDetailCard";
 import FacilityMarker from "../components/map/FacilityMarker";
 import MapEvents from "../components/map/MapEvents";
@@ -33,13 +34,16 @@ const userPinIcon = L.icon({
 });
 
 const MapPage = () => {
-	const [mapCenter, setMapCenter] = useState([-6.9929, 110.4253]);
+	// Lokasi Default Simpang Lima 
+	const SIMPANG_LIMA_COORDS = [-6.9904397128823295, 110.42294902766812];
+	const [mapCenter, setMapCenter] = useState(SIMPANG_LIMA_COORDS);
 	const [userPin, setUserPin] = useState(null);
 	const [showResults, setShowResults] = useState(false);
 	const [facilities] = useState(dummyFacilities);
 	const [selectedFacility, setSelectedFacility] = useState(null);
 	const [activeFilter, setActiveFilter] = useState("all");
 	const mapRef = useRef(null);
+
 	const filteredFacilities = useMemo(() => {
 		if (activeFilter === "all") {
 			return facilities;
@@ -54,20 +58,30 @@ const MapPage = () => {
 	};
 
 	const handleUseMyLocation = () => {
-		navigator.geolocation.getCurrentPosition((position) => {
-			const myLocation = {
-				lat: position.coords.latitude,
-				lng: position.coords.longitude,
-			};
-			setMapCenter([myLocation.lat, myLocation.lng]);
-			setUserPin(myLocation);
-			setSelectedFacility(null);
-			if (mapRef.current) {
-				setTimeout(() => {
-					mapRef.current.flyTo([myLocation.lat, myLocation.lng], 16);
-				});
-			}
-		});
+		// Di non aktifkan untuk nanti saat data sudah siap
+		// navigator.geolocation.getCurrentPosition((position) => {
+		// 	const myLocation = {
+		// 		lat: position.coords.latitude,
+		// 		lng: position.coords.longitude,
+		// 	};
+		// 	setMapCenter([myLocation.lat, myLocation.lng]);
+		// 	setUserPin(myLocation);
+		// 	setSelectedFacility(null);
+		// });
+		const defaultLocation = {
+			lat: SIMPANG_LIMA_COORDS[0],
+			lng: SIMPANG_LIMA_COORDS[1],
+		};
+
+		setMapCenter(SIMPANG_LIMA_COORDS);
+		setUserPin(defaultLocation);
+		setSelectedFacility(null);
+
+		if (mapRef.current) {
+			setTimeout(() => {
+				mapRef.current.flyTo(SIMPANG_LIMA_COORDS, 16);
+			}, 100)
+		} 
 	};
 
 	const handleCheckFacilities = () => {
@@ -96,7 +110,6 @@ const MapPage = () => {
 				className="relative shadow-md z-30 flex items-center justify-between px-4 md:px-6 lg:px-8 xl:px-10 2xl:px-12"
 				style={{
 					backgroundColor: "#213448",
-					// (PENYESUAIAN) Nilai height diubah untuk menambah tinggi navbar
 					height: "clamp(65px, 9vh, 110px)",
 					boxSizing: "border-box",
 				}}
@@ -239,7 +252,14 @@ const MapPage = () => {
 					onClose={() => setSelectedFacility(null)}
 				/>
 
-				<BottomSheet
+				<SidePanel
+					isVisible={showResults && !selectedFacility}
+					facilities={filteredFacilities}
+					geoInfo={dummyGeographicInfo}
+					onFacilitySelect={handleFacilitySelect}
+					onClose={resetView}
+				/>
+				{/* <BottomSheet
 					isVisible={showResults && !selectedFacility}
 					facilities={filteredFacilities}
 					allFacilities={facilities}
@@ -248,7 +268,7 @@ const MapPage = () => {
 					activeFilter={activeFilter}
 					onFilterChange={setActiveFilter}
 					onClose={resetView}
-				/>
+				/> */}
 			</main>
 		</div>
 	);
