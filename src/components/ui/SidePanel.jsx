@@ -142,7 +142,7 @@ const SidePanel = ({ isVisible, facilities, geoInfo, onFacilitySelect, onClose }
                         </div>
 
                         {/* Header Detail Informasi Geografis */}
-                        <div className="flex-shrink-0 mx-14 px-4 pt-4 pb-3">
+                        <div className="flex-shrink-0 mx-14 px-4 pt-6 pb-3">
                             <div className="p-3 rounded-lg mb-3 bg-brand-accent">
                                 <h3 className="font-semibold text-brand-dark-blue text-center">
                                     Detail Informasi Geografis
