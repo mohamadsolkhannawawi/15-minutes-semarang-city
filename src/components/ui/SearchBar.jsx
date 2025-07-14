@@ -14,7 +14,7 @@ const SearchBar = ({ onSearch, onClear }) => {
 	};
 
 	return (
-		<form onSubmit={handleSubmit} className="relative w-full max-w-full">
+		<form onSubmit={handleSubmit} className="relative w-1/2 max-w-full ml-auto">
 			<input
 				type="text"
 				value={query}
