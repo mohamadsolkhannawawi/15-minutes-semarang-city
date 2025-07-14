@@ -7,6 +7,7 @@ import clsx from "clsx";
 // Import komponen & data
 import SearchBar from "../components/ui/SearchBar";
 import BottomSheet from "../components/ui/BottomSheet";
+import SidePanel from "../components/ui/SidePanel";
 import FacilityDetailCard from "../components/ui/FacilityDetailCard";
 import FacilityMarker from "../components/map/FacilityMarker";
 import MapEvents from "../components/map/MapEvents";
@@ -33,7 +34,7 @@ const userPinIcon = L.icon({
 });
 
 const MapPage = () => {
-	// Lokasi Deafult Simpang Lima 
+	// Lokasi Default Simpang Lima 
 	const SIMPANG_LIMA_COORDS = [-6.9904397128823295, 110.42294902766812];
 	const [mapCenter, setMapCenter] = useState(SIMPANG_LIMA_COORDS);
 	const [userPin, setUserPin] = useState(null);
@@ -77,7 +78,7 @@ const MapPage = () => {
 		setSelectedFacility(null);
 
 		if (mapRef.current) {
-			setTimeout (() => {
+			setTimeout(() => {
 				mapRef.current.flyTo(SIMPANG_LIMA_COORDS, 16);
 			}, 100)
 		} 
@@ -109,7 +110,6 @@ const MapPage = () => {
 				className="relative shadow-md z-30 flex items-center justify-between px-4 md:px-6 lg:px-8 xl:px-10 2xl:px-12"
 				style={{
 					backgroundColor: "#213448",
-					// (PENYESUAIAN) Nilai height diubah untuk menambah tinggi navbar
 					height: "clamp(65px, 9vh, 110px)",
 					boxSizing: "border-box",
 				}}
@@ -252,7 +252,14 @@ const MapPage = () => {
 					onClose={() => setSelectedFacility(null)}
 				/>
 
-				<BottomSheet
+				<SidePanel
+					isVisible={showResults && !selectedFacility}
+					facilities={filteredFacilities}
+					geoInfo={dummyGeographicInfo}
+					onFacilitySelect={handleFacilitySelect}
+					onClose={resetView}
+				/>
+				{/* <BottomSheet
 					isVisible={showResults && !selectedFacility}
 					facilities={filteredFacilities}
 					allFacilities={facilities}
@@ -261,7 +268,7 @@ const MapPage = () => {
 					activeFilter={activeFilter}
 					onFilterChange={setActiveFilter}
 					onClose={resetView}
-				/>
+				/> */}
 			</main>
 		</div>
 	);
