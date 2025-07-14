@@ -42,7 +42,7 @@ const MainPage = ({ onCheckLocation }) => {
 
 				{/* Wrapper untuk Deskripsi dan Tombol */}
 				<div
-					className="absolute"
+					className="absolute content-wrapper"
 					style={{
 						// (PENYESUAIAN) Mengurangi nilai 'top' untuk memperkecil jarak dari judul
 						top: "clamp(260px, 31vh, 390px)",
@@ -56,7 +56,7 @@ const MainPage = ({ onCheckLocation }) => {
 				>
 					{/* Kotak Deskripsi */}
 					<div
-						className="w-full rounded-lg shadow-xl font-poppins"
+						className="w-full rounded-lg shadow-xl font-poppins description-box"
 						style={{
 							backgroundColor: "rgba(148, 180, 193, 0.75)",
 							padding: "clamp(20px, 2.78vw, 40px)",
@@ -64,13 +64,14 @@ const MainPage = ({ onCheckLocation }) => {
 						}}
 					>
 						<p
-							className="text-justify leading-relaxed"
+							className="text-justify leading-relaxed description-text"
 							style={{
 								fontWeight: "500",
 								color: "#213448",
 								textShadow: "inset 0 2px 4px rgba(0,0,0,0.1)",
 								fontSize: "clamp(14px, 1.8vw, 26px)",
 								lineHeight: "1.4",
+								fontFamily: "system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'",
 							}}
 						>
 							Program Kota 15-Menit Semarang adalah platform strategis untuk
@@ -85,7 +86,7 @@ const MainPage = ({ onCheckLocation }) => {
 					{/* Tombol - Di bawah Deskripsi */}
 					<button
 						onClick={onCheckLocation}
-						className="flex items-center justify-center gap-3 rounded-full font-bold transition-all duration-300 transform hover:scale-105 font-poppins"
+						className="flex items-center justify-center gap-3 rounded-full font-bold transition-all duration-300 transform hover:scale-105 font-poppins action-button"
 						style={{
 							backgroundColor: "#547792",
 							color: "#ECEFCA",
@@ -97,6 +98,7 @@ const MainPage = ({ onCheckLocation }) => {
 							whiteSpace: "nowrap",
 							padding: "0 clamp(24px, 2.5vw, 40px)",
 							height: "clamp(50px, 5.56vh, 80px)",
+							fontFamily: "system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'",
 						}}
 					>
 						Periksa Lokasi Saya
