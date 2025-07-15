@@ -1,8 +1,11 @@
-import React, { useState, useMemo, useRef } from "react";
+import React, { useState, useMemo, useRef, useEffect } from "react";
 import { MapContainer, TileLayer, Marker, Polygon } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import clsx from "clsx";
+
+// Import CSS untuk mobile layout
+import "../styles/mobile.css";
 
 // Import komponen & data
 import SearchBar from "../components/ui/SearchBar";
@@ -34,7 +37,7 @@ const userPinIcon = L.icon({
 });
 
 const MapPage = () => {
-	// Lokasi Default Simpang Lima 
+	// Lokasi Default Simpang Lima
 	const SIMPANG_LIMA_COORDS = [-6.9904397128823295, 110.42294902766812];
 	const [mapCenter, setMapCenter] = useState(SIMPANG_LIMA_COORDS);
 	const [userPin, setUserPin] = useState(null);
@@ -42,7 +45,18 @@ const MapPage = () => {
 	const [facilities] = useState(dummyFacilities);
 	const [selectedFacility, setSelectedFacility] = useState(null);
 	const [activeFilter, setActiveFilter] = useState("all");
+	const [isMobile, setIsMobile] = useState(window.innerWidth <= 810);
 	const mapRef = useRef(null);
+
+	// Detect mobile screen
+	useEffect(() => {
+		const handleResize = () => {
+			setIsMobile(window.innerWidth <= 810);
+		};
+
+		window.addEventListener("resize", handleResize);
+		return () => window.removeEventListener("resize", handleResize);
+	}, []);
 
 	const filteredFacilities = useMemo(() => {
 		if (activeFilter === "all") {
@@ -80,8 +94,8 @@ const MapPage = () => {
 		if (mapRef.current) {
 			setTimeout(() => {
 				mapRef.current.flyTo(SIMPANG_LIMA_COORDS, 16);
-			}, 100)
-		} 
+			}, 100);
+		}
 	};
 
 	const handleCheckFacilities = () => {
@@ -107,7 +121,7 @@ const MapPage = () => {
 	return (
 		<div className="h-screen w-screen flex flex-col font-sans">
 			<header
-				className="relative shadow-md z-30 flex items-center justify-between px-4 md:px-6 lg:px-8 xl:px-10 2xl:px-12"
+				className="mappage-header relative shadow-md z-30 flex items-center justify-between px-4 md:px-6 lg:px-8 xl:px-10 2xl:px-12"
 				style={{
 					backgroundColor: "#213448",
 					height: "clamp(65px, 9vh, 110px)",
@@ -251,6 +265,32 @@ const MapPage = () => {
 					facility={selectedFacility}
 					onClose={() => setSelectedFacility(null)}
 				/>
+
+				{/* Tombol Maximize untuk Mobile */}
+				{isMobile && showResults && (
+					<button
+						className={clsx("maximize-button", {
+							active: !selectedFacility,
+						})}
+						onClick={() => setSelectedFacility(null)}
+						aria-label="Tampilkan daftar fasilitas"
+					>
+						<svg
+							xmlns="http://www.w3.org/2000/svg"
+							fill="none"
+							viewBox="0 0 24 24"
+							strokeWidth={2}
+							stroke="currentColor"
+							className="w-6 h-6 text-brand-dark-blue"
+						>
+							<path
+								strokeLinecap="round"
+								strokeLinejoin="round"
+								d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15"
+							/>
+						</svg>
+					</button>
+				)}
 
 				<SidePanel
 					isVisible={showResults && !selectedFacility}

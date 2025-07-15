@@ -1,0 +1,31 @@
+.facility-detail-mobile {
+	position: fixed;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	background: white;
+	border-radius: 20px 20px 0 0;
+	transform: translateY(100%);
+	transition: transform 0.3s ease-out;
+	z-index: 1000;
+	box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.facility-detail-mobile.open {
+	transform: translateY(0);
+}
+
+.maximize-button {
+	position: fixed;
+	bottom: 20px;
+	left: 50%;
+	transform: translateX(-50%);
+	background-color: white;
+	padding: 12px;
+	border-radius: 50%;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+	cursor: pointer;
+	z-index: 40;
+	transition: all 0.3s ease-out;
+	display: flex;
+}
