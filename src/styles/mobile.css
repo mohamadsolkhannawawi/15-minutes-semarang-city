@@ -55,7 +55,7 @@
 
 	/* Styling khusus untuk button X */
 	.mappage-header .flex-shrink-0 button[aria-label="Clear search"] {
-		right: 30px !important;
+		right: 30px !important; /* Memberikan jarak dari kanan */
 	}
 
 	/* Styling khusus untuk button search */
@@ -299,7 +299,7 @@
 		transform: translateY(100%) !important;
 		transition: transform 0.3s ease-in-out !important;
 		z-index: 1000 !important;
-		max-height: 85vh !important;
+		max-height: 90vh !important;
 		overflow-y: auto !important;
 		padding-bottom: env(safe-area-inset-bottom, 16px) !important;
 	}
@@ -313,22 +313,12 @@
 		height: 4px !important;
 		background-color: #e0e0e0 !important;
 		border-radius: 2px !important;
-		margin: 12px auto 8px auto !important;
+		margin: 8px auto !important;
 		cursor: grab !important;
 	}
 
 	.facility-detail-content {
-		padding: 0 16px 24px 16px !important;
-		margin-bottom: env(safe-area-inset-bottom, 16px) !important;
-	}
-
-	/* Menyesuaikan spacing internal */
-	.facility-detail-content > * {
-		margin-bottom: 12px !important;
-	}
-
-	.facility-detail-content > *:last-child {
-		margin-bottom: 0 !important;
+		padding: 0 16px 20px 16px !important;
 	}
 
 	/* Hide desktop version in mobile */
@@ -345,20 +335,13 @@
 
 	.facility-detail-desktop {
 		display: block !important;
-		position: absolute !important;
-		top: 50% !important;
-		left: 50% !important;
-		transform: translate(-50%, -50%) !important;
-		background: white !important;
-		border-radius: 16px !important;
-		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
-		z-index: 1000 !important;
-		min-width: 320px !important;
-		max-width: 400px !important;
-		padding: 24px !important;
 	}
 
 	.map-page-mobile-layout {
 		display: none !important;
+	}
+
+	.map-page-desktop-layout {
+		display: flex !important;
 	}
 }
