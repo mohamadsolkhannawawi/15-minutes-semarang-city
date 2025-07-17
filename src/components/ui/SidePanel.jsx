@@ -135,7 +135,7 @@ const SidePanel = ({
 											onClick={() => onFacilitySelect(facility)}
 											className="group flex items-center gap-3 hover:bg-white/50 p-3 rounded-lg transition-colors w-full text-left"
 										>
-											<span className="flex-shrink-0 w-6 text-center font-semibold text-brand-dark-blue">
+											<span className="flex-shrink-0 w-6 text-center font-semibold text-brand-dark-blue text-sm">
 												{index + 1}.
 											</span>
 											<img
@@ -143,7 +143,7 @@ const SidePanel = ({
 												alt={facility.type}
 												className="w-6 h-6 object-contain flex-shrink-0"
 											/>
-											<span className="flex-grow font-medium group-hover:underline text-brand-dark-blue">
+											<span className="flex-grow font-medium group-hover:underline text-brand-dark-blue text-sm">
 												{facility.name}
 											</span>
 										</button>
