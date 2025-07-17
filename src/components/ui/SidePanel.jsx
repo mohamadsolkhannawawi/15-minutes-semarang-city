@@ -110,7 +110,7 @@ const SidePanel = ({
 								className="p-2 hover:bg-white/30 rounded-full transition-colors"
 								title="Minimize"
 							>
-								<img src={MinimizeIcon} alt="Minimize" className="w-5 h-5" />
+								<img src={MinimizeIcon} alt="Minimize" className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6" />
 							</button>
 						</div>
 
@@ -193,13 +193,13 @@ const SidePanel = ({
 					<div className="flex items-center justify-center h-full w-full">
 						<button
 							onClick={toggleMinimize}
-							className="p-2 hover:bg-white/30 rounded-full transition-colors"
+							className="p-3 md:p-2 sm:p-1 hover:bg-white/30 rounded-full transition-colors"
 							title="Maximize"
 						>
 							<img
 								src={MaximizeIcon}
 								alt="Maximize"
-								className="w-6 h-6"
+								className="w-6 h-6 md:w-5 md:h-5 sm:w-4 sm:h-4"
 								style={{ filter: "brightness(0) invert(1)" }}
 							/>
 						</button>
