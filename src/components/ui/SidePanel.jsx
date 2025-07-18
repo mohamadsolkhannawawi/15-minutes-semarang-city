@@ -70,6 +70,9 @@ const SidePanel = ({
 		minimizePadding: "p-2",
 		maximizePadding: "p-2",
 		minimizedButtonSize: "60px",
+		headerFontSize: "text-base", // Default font size for headers
+		listFontSize: "text-sm", // Default font size for list items
+		infoFontSize: "text-sm", // Default font size for info text
 	});
 
 	// Sistem responsif mirip MainPage
@@ -80,6 +83,7 @@ const SidePanel = ({
 			if (width <= 320) {
 				// Mobile sangat kecil
 				setResponsiveConfig({
+					...responsiveConfig,
 					minimizeIconSize: "w-3 h-3",
 					maximizeIconSize: "w-4 h-4",
 					minimizePadding: "p-1",
@@ -87,10 +91,14 @@ const SidePanel = ({
 					topPosition: "75px",
 					marginTop: "10px",
 					minimizedButtonSize: "35px",
+					headerFontSize: "text-[12px]",
+					listFontSize: "text-[11px]",
+					infoFontSize: "text-[11px]",
 				});
 			} else if (width <= 420) {
 				// Mobile kecil
 				setResponsiveConfig({
+					...responsiveConfig,
 					minimizeIconSize: "w-4 h-4",
 					maximizeIconSize: "w-4 h-4",
 					minimizePadding: "p-1",
@@ -98,10 +106,14 @@ const SidePanel = ({
 					topPosition: "clamp(75px, 10vh, 75px)",
 					marginTop: "clamp(10px, 1.5vh, 10px)",
 					minimizedButtonSize: "40px",
+					headerFontSize: "text-[12px]",
+					listFontSize: "text-[11px]",
+					infoFontSize: "text-[11px]",
 				});
 			} else if (width <= 610) {
 				// Mobile medium
 				setResponsiveConfig({
+					...responsiveConfig,
 					minimizeIconSize: "w-4 h-4",
 					maximizeIconSize: "w-5 h-5",
 					minimizePadding: "p-1.5",
@@ -109,10 +121,14 @@ const SidePanel = ({
 					topPosition: "clamp(85px, 12vh, 100px)",
 					marginTop: "clamp(12px, 2vh, 16px)",
 					minimizedButtonSize: "45px",
+					headerFontSize: "text-[12px]", // Mengubah dari text-xs
+					listFontSize: "text-xs",
+					infoFontSize: "text-xs",
 				});
 			} else if (width <= 769) {
 				// Tablet kecil
 				setResponsiveConfig({
+					...responsiveConfig,
 					minimizeIconSize: "w-4 h-4",
 					maximizeIconSize: "w-5 h-5",
 					minimizePadding: "p-1.5",
@@ -120,10 +136,14 @@ const SidePanel = ({
 					topPosition: "clamp(85px, 12vh, 100px)",
 					marginTop: "clamp(12px, 2vh, 16px)",
 					minimizedButtonSize: "50px",
+					headerFontSize: "text-sm",
+					listFontSize: "text-xs",
+					infoFontSize: "text-xs",
 				});
 			} else if (width <= 810) {
 				// Tablet medium
 				setResponsiveConfig({
+					...responsiveConfig,
 					minimizeIconSize: "w-5 h-5",
 					maximizeIconSize: "w-5 h-5",
 					minimizePadding: "p-2",
@@ -131,24 +151,49 @@ const SidePanel = ({
 					topPosition: "clamp(85px, 12vh, 100px)",
 					marginTop: "clamp(12px, 2vh, 16px)",
 					minimizedButtonSize: "50px",
+					headerFontSize: "text-[12px]",
+					listFontSize: "text-[11px]",
+					infoFontSize: "text-[11px]",
 				});
-			} else if (width <= 1025) {
+			} else if (width <= 983) {
+				setResponsiveConfig({
+					...responsiveConfig,
+					minimizeIconSize: "w-5 h-5",
+					maximizeIconSize: "w-5 h-5",
+					minimizePadding: "p-2",
+					maximizePadding: "p-2",
+					topPosition: "clamp(85px, 12vh, 100px)",
+					marginTop: "clamp(12px, 2vh, 16px)",
+					minimizedButtonSize: "50px",
+					headerFontSize: "text-[12px]",
+					listFontSize: "text-[11px]",
+					infoFontSize: "text-[11px]",
+				});
+			} else if (width <= 1178) {
 				// Tablet besar
 				setResponsiveConfig({
+					...responsiveConfig,
 					minimizeIconSize: "w-5 h-5",
 					maximizeIconSize: "w-6 h-6",
 					minimizePadding: "p-2",
 					maximizePadding: "p-2",
 					minimizedButtonSize: "65px",
+					headerFontSize: "text-sm",
+					listFontSize: "text-sm",
+					infoFontSize: "text-sm",
 				});
 			} else {
 				// Desktop (default - ukuran terbesar)
 				setResponsiveConfig({
+					...responsiveConfig,
 					minimizeIconSize: "w-5 h-5",
 					maximizeIconSize: "w-6 h-6",
 					minimizePadding: "p-2",
 					maximizePadding: "p-2",
 					minimizedButtonSize: "65px",
+					headerFontSize: "text-base",
+					listFontSize: "text-sm",
+					infoFontSize: "text-sm",
 				});
 			}
 		};
@@ -222,10 +267,14 @@ const SidePanel = ({
 
 						{/* Header dengan background brand-accent */}
 						<div className="flex-shrink-0 mx-14 px-4 pt-4 pb-1">
-							<div className="p-3 rounded-lg mb-3 bg-brand-accent">
-								<h2 className="font-bold text-brand-dark-blue text-center">
-									{facilities.length} Fasilitas Publik Ditemukan
-								</h2>
+							<div className="flex justify-center">
+								<div className="p-3 rounded-lg mb-3 bg-brand-accent inline-block">
+									<h2
+										className={`font-bold text-brand-dark-blue text-center whitespace-nowrap ${responsiveConfig.headerFontSize}`}
+									>
+										{facilities.length} Fasilitas Publik Ditemukan
+									</h2>
+								</div>
 							</div>
 						</div>
 
@@ -241,7 +290,9 @@ const SidePanel = ({
 											onClick={() => onFacilitySelect(facility)}
 											className="group flex items-center gap-3 hover:bg-white/50 p-3 rounded-lg transition-colors w-full text-left"
 										>
-											<span className="flex-shrink-0 w-6 text-center font-semibold text-brand-dark-blue text-sm">
+											<span
+												className={`flex-shrink-0 w-6 text-center font-semibold text-brand-dark-blue ${responsiveConfig.listFontSize}`}
+											>
 												{index + 1}.
 											</span>
 											<img
@@ -249,7 +300,9 @@ const SidePanel = ({
 												alt={facility.type}
 												className="w-6 h-6 object-contain flex-shrink-0"
 											/>
-											<span className="flex-grow font-medium group-hover:underline text-brand-dark-blue text-sm">
+											<span
+												className={`flex-grow font-medium group-hover:underline text-brand-dark-blue ${responsiveConfig.listFontSize}`}
+											>
 												{facility.name}
 											</span>
 										</button>
@@ -260,16 +313,22 @@ const SidePanel = ({
 
 						{/* Header Detail Informasi Geografis */}
 						<div className="flex-shrink-0 mx-14 px-4 pt-4 pb-1">
-							<div className="p-3 rounded-lg mb-2 bg-brand-accent">
-								<h3 className="font-semibold text-brand-dark-blue text-center">
-									Detail Informasi Geografis
-								</h3>
+							<div className="flex justify-center">
+								<div className="p-3 rounded-lg mb-2 bg-brand-accent inline-block">
+									<h3
+										className={`font-semibold text-brand-dark-blue text-center whitespace-nowrap ${responsiveConfig.headerFontSize}`}
+									>
+										Detail Informasi Geografis
+									</h3>
+								</div>
 							</div>
 						</div>
 
 						{/* Konten Detail Informasi Geografis */}
 						<div className="flex-shrink-0 px-4 pb-4">
-							<div className="text-sm text-brand-dark-blue">
+							<div
+								className={`text-brand-dark-blue ${responsiveConfig.infoFontSize}`}
+							>
 								<div
 									className="grid gap-1"
 									style={{
