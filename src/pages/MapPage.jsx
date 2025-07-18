@@ -59,6 +59,16 @@ const MapPage = () => {
 		"clamp(14px, 2vw, 24px)"
 	);
 
+	// Tambahkan state untuk button styling
+	const [buttonConfig, setButtonConfig] = useState({
+		fontSize: "text-base",
+		padding: "py-4 px-6",
+		iconSize: "w-6 h-6",
+		height: "h-[60px]",
+		width: "w-[300px]",
+		gap: "gap-3",
+	});
+
 	// Detect mobile screen
 	useEffect(() => {
 		const handleResize = () => {
@@ -131,6 +141,91 @@ const MapPage = () => {
 		handleHeaderResize();
 		window.addEventListener("resize", handleHeaderResize);
 		return () => window.removeEventListener("resize", handleHeaderResize);
+	}, []);
+
+	// Tambahkan useEffect untuk button styling
+	useEffect(() => {
+		const handleButtonResize = () => {
+			const width = window.innerWidth;
+
+			if (width <= 340) {
+				setButtonConfig({
+					fontSize: "text-[10px]",
+					padding: "py-1.5 px-2",
+					iconSize: "w-3.5 h-3.5",
+					height: "h-[40px]",
+					width: "w-[200px]",
+					gap: "gap-1",
+				});
+			} else if (width <= 420) {
+				setButtonConfig({
+					fontSize: "text-[11px]",
+					padding: "py-2 px-3",
+					iconSize: "w-4 h-4",
+					height: "h-[40px]",
+					width: "w-[220px]",
+					gap: "gap-1.5",
+				});
+			} else if (width <= 610) {
+				setButtonConfig({
+					fontSize: "text-[11px]",
+					padding: "py-2 px-3",
+					iconSize: "w-4 h-4",
+					height: "h-[42px]",
+					width: "w-[225px]",
+					gap: "gap-1.5",
+				});
+			} else if (width <= 769) {
+				setButtonConfig({
+					fontSize: "text-[13px]",
+					padding: "py-3 px-4",
+					iconSize: "w-5 h-5",
+					height: "h-[48px]",
+					width: "w-[260px]",
+					gap: "gap-2",
+				});
+			} else if (width <= 810) {
+				setButtonConfig({
+					fontSize: "text-[13px]",
+					padding: "py-3 px-5",
+					iconSize: "w-5 h-5",
+					height: "h-[50px]",
+					width: "w-[270px]",
+					gap: "gap-2",
+				});
+			} else if (width <= 983) {
+				setButtonConfig({
+					fontSize: "text-[13px]",
+					padding: "py-2.5 px-4",
+					iconSize: "w-5 h-5",
+					height: "h-[45px]",
+					width: "w-[250px]",
+					gap: "gap-2",
+				});
+			} else if (width <= 1178) {
+				setButtonConfig({
+					fontSize: "text-[14px]",
+					padding: "py-3 px-4",
+					iconSize: "w-5 h-5",
+					height: "h-[48px]",
+					width: "w-[260px]",
+					gap: "gap-2",
+				});
+			} else {
+				setButtonConfig({
+					fontSize: "text-base",
+					padding: "py-4 px-6",
+					iconSize: "w-6 h-6",
+					height: "h-[60px]",
+					width: "w-[300px]",
+					gap: "gap-3",
+				});
+			}
+		};
+
+		handleButtonResize();
+		window.addEventListener("resize", handleButtonResize);
+		return () => window.removeEventListener("resize", handleButtonResize);
 	}, []);
 
 	const filteredFacilities = useMemo(() => {
@@ -277,16 +372,20 @@ const MapPage = () => {
 						{ "opacity-0 pointer-events-none": showResults }
 					)}
 					style={{
-						width: "clamp(280px, 80vw, 300px)",
+						width: buttonConfig.width,
 						maxWidth: "90vw",
 					}}
 				>
 					<button
 						onClick={handleUseMyLocation}
-						className="w-full py-3 sm:py-4 px-4 sm:px-6 bg-brand-light-blue text-brand-dark-blue font-semibold rounded-xl shadow-lg hover:bg-white transition-all duration-200 flex items-center justify-center gap-2 sm:gap-3 font-poppins"
+						className={clsx(
+							"w-full bg-brand-light-blue text-brand-dark-blue font-semibold rounded-xl shadow-lg hover:bg-white transition-all duration-200 flex items-center justify-center font-poppins",
+							buttonConfig.padding,
+							buttonConfig.fontSize,
+							buttonConfig.gap
+						)}
 						style={{
-							fontSize: "clamp(14px, 1.1vw, 16px)",
-							height: "clamp(50px, 4vh, 60px)",
+							height: buttonConfig.height,
 						}}
 					>
 						<svg
@@ -295,7 +394,7 @@ const MapPage = () => {
 							viewBox="0 0 24 24"
 							strokeWidth={1.5}
 							stroke="currentColor"
-							className="w-5 h-5 sm:w-6 sm:h-6"
+							className={buttonConfig.iconSize}
 						>
 							<path
 								strokeLinecap="round"
@@ -312,10 +411,14 @@ const MapPage = () => {
 					</button>
 					<button
 						onClick={handleCheckFacilities}
-						className="w-full py-3 sm:py-4 px-4 sm:px-6 bg-brand-accent text-brand-dark-blue font-semibold rounded-xl shadow-lg hover:bg-white transition-all duration-200 flex items-center justify-center gap-2 sm:gap-3 font-poppins"
+						className={clsx(
+							"w-full bg-brand-accent text-brand-dark-blue font-semibold rounded-xl shadow-lg hover:bg-white transition-all duration-200 flex items-center justify-center font-poppins",
+							buttonConfig.padding,
+							buttonConfig.fontSize,
+							buttonConfig.gap
+						)}
 						style={{
-							fontSize: "clamp(14px, 1.1vw, 16px)",
-							height: "clamp(50px, 4vh, 60px)",
+							height: buttonConfig.height,
 						}}
 					>
 						<svg
@@ -324,7 +427,7 @@ const MapPage = () => {
 							viewBox="0 0 24 24"
 							strokeWidth={1.5}
 							stroke="currentColor"
-							className="w-5 h-5 sm:w-6 sm:h-6"
+							className={buttonConfig.iconSize}
 						>
 							<path
 								strokeLinecap="round"
