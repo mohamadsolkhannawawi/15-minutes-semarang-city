@@ -111,12 +111,11 @@ const FacilityDetailCard = ({ facility, onClose }) => {
 			onTouchMove={handleTouchMove}
 			onTouchEnd={handleTouchEnd}
 		>
-			<div className="facility-detail-handle" />
 			<div className="facility-detail-content px-6">
-				<div className="relative bg-white pt-1 pb-1 mb-2">
+				<div className="relative bg-white pt-4 pb-1 mb-2">
 					<button
 						onClick={onClose}
-						className="absolute -top-3 -right-2 p-1.5 bg-white hover:bg-gray-100 rounded-full transition-colors shadow-md"
+						className="absolute top-0 -right-2 p-1.5 bg-white hover:bg-gray-100 rounded-full transition-colors shadow-md"
 					>
 						<svg
 							xmlns="http://www.w3.org/2000/svg"
@@ -135,7 +134,7 @@ const FacilityDetailCard = ({ facility, onClose }) => {
 					</button>
 				</div>
 				<div className="flex justify-center mb-3">
-					<p className="text-sm sm:text-base md:text-lg text-brand-accent bg-brand-dark-blue py-1.5 px-6 rounded-lg font-semibold inline-block font-poppins">
+					<p className="text-sm sm:text-base md:text-lg text-brand-dark-blue bg-[#F0EAD6] py-1.5 px-6 rounded-lg font-semibold inline-block font-poppins">
 						Detail Informasi Fasilitas
 					</p>
 				</div>
@@ -315,7 +314,7 @@ const FacilityDetailCard = ({ facility, onClose }) => {
 					</button>
 				</div>
 				<div className="flex justify-center mb-3">
-					<p className="text-sm sm:text-base md:text-lg text-brand-accent bg-brand-dark-blue py-1.5 px-6 rounded-lg font-semibold inline-block font-poppins">
+					<p className="text-sm sm:text-base md:text-lg text-brand-dark-blue bg-[#F0EAD6] py-1.5 px-6 rounded-lg font-semibold inline-block font-poppins">
 						Detail Informasi Fasilitas
 					</p>
 				</div>
