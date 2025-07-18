@@ -48,6 +48,12 @@ const MapPage = () => {
 	const [isMobile, setIsMobile] = useState(window.innerWidth <= 810);
 	const mapRef = useRef(null);
 
+	const [maximizeConfig, setMaximizeConfig] = useState({
+		buttonSize: "w-12 h-12",
+		iconSize: "w-6 h-6",
+		buttonPadding: "p-3"
+	});
+
 	// Detect mobile screen
 	useEffect(() => {
 		const handleResize = () => {
@@ -55,7 +61,55 @@ const MapPage = () => {
 		};
 
 		window.addEventListener("resize", handleResize);
-		return () => window.removeEventListener("resize", handleResize);
+		return () => window.removeEventListener("resize", handleResize);	
+	}, []);
+
+	useEffect(() => {
+		const handleMaximizeResize = () => {
+			const width = window.innerWidth;
+			
+			if (width <= 320) {
+				setMaximizeConfig({
+					iconSize: "w-4 h-4", 
+					buttonPadding: "p-1",
+					bottomPosition: "bottom-4",
+					rightPosition: "right-4"
+				});
+			} else if (width <= 420) {
+				setMaximizeConfig({
+					iconSize: "w-4 h-4",
+					buttonPadding: "p-1.5",
+					bottomPosition: "bottom-4",
+					rightPosition: "right-4"
+				});
+			} else if (width <= 610) {
+				setMaximizeConfig({
+					iconSize: "w-5 h-5",
+					buttonPadding: "p-2",
+					bottomPosition: "bottom-5",
+					rightPosition: "right-5"
+				});
+			} else if (width <= 810) {
+				setMaximizeConfig({
+					iconSize: "w-6 h-6",
+					buttonPadding: "p-2.5", 
+					bottomPosition: "bottom-6",
+					rightPosition: "right-6"
+				});
+			} else {
+				// Desktop (default - ukuran terbesar)
+				setMaximizeConfig({
+					iconSize: "w-6 h-6",
+					buttonPadding: "p-3",
+					bottomPosition: "bottom-6",
+					rightPosition: "right-6"
+				});
+			}
+		};
+
+		handleMaximizeResize();
+		window.addEventListener("resize", handleMaximizeResize);
+		return () => window.removeEventListener("resize", handleMaximizeResize);
 	}, []);
 
 	const filteredFacilities = useMemo(() => {
@@ -269,9 +323,12 @@ const MapPage = () => {
 				{/* Tombol Maximize untuk Mobile */}
 				{isMobile && showResults && (
 					<button
-						className={clsx("maximize-button", {
-							active: !selectedFacility,
-						})}
+						className={clsx(
+							"fixed z-30 bg-brand-accent text-brand-dark-blue rounded-full shadow-lg hover:bg-brand-light-blue transition-all duration-200 flex items-center justify-center",
+							maximizeConfig.buttonPadding,
+							maximizeConfig.bottomPosition,
+							maximizeConfig.rightPosition
+						)}
 						onClick={() => setSelectedFacility(null)}
 						aria-label="Tampilkan daftar fasilitas"
 					>
@@ -281,7 +338,7 @@ const MapPage = () => {
 							viewBox="0 0 24 24"
 							strokeWidth={2}
 							stroke="currentColor"
-							className="w-6 h-6 text-brand-dark-blue"
+							className={clsx(maximizeConfig.iconSize, "text-brand-dark-blue")}
 						>
 							<path
 								strokeLinecap="round"
@@ -299,16 +356,6 @@ const MapPage = () => {
 					onFacilitySelect={handleFacilitySelect}
 					onClose={resetView}
 				/>
-				{/* <BottomSheet
-					isVisible={showResults && !selectedFacility}
-					facilities={filteredFacilities}
-					allFacilities={facilities}
-					geoInfo={dummyGeographicInfo}
-					onFacilitySelect={handleFacilitySelect}
-					activeFilter={activeFilter}
-					onFilterChange={setActiveFilter}
-					onClose={resetView}
-				/> */}
 			</main>
 		</div>
 	);

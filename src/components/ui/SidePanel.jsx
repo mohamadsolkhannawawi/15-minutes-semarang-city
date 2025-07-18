@@ -68,7 +68,8 @@ const SidePanel = ({
         minimizeIconSize: "w-5 h-5",
         maximizeIconSize: "w-6 h-6",
         minimizePadding: "p-2",
-        maximizePadding: "p-2"
+        maximizePadding: "p-2", 
+		minimizedButtonSize: "60px"
     });
 
     // Sistem responsif mirip MainPage
@@ -84,7 +85,8 @@ const SidePanel = ({
                     minimizePadding: "p-1",
                     maximizePadding: "p-1",
 					topPosition: "75px",
-					marginTop: "10px"
+					marginTop: "10px",
+					minimizedButtonSize: "35px"
                 });
             } else if (width <= 420) {
                 // Mobile kecil
@@ -94,7 +96,8 @@ const SidePanel = ({
                     minimizePadding: "p-1",
                     maximizePadding: "p-1",
 					topPosition: "clamp(75px, 10vh, 75px)",
-                    marginTop: "clamp(10px, 1.5vh, 10px)"
+                    marginTop: "clamp(10px, 1.5vh, 10px)",
+					minimizedButtonSize: "40px"
                 });
             } else if (width <= 610) {
                 // Mobile medium
@@ -104,7 +107,8 @@ const SidePanel = ({
                     minimizePadding: "p-1.5",
                     maximizePadding: "p-1.5",
 					topPosition: "clamp(85px, 12vh, 100px)",
-                    marginTop: "clamp(12px, 2vh, 16px)"
+                    marginTop: "clamp(12px, 2vh, 16px)",
+					minimizedButtonSize: "45px"
                 });
             } else if (width <= 769) {
                 // Tablet kecil
@@ -113,8 +117,9 @@ const SidePanel = ({
                     maximizeIconSize: "w-5 h-5",
                     minimizePadding: "p-1.5",
                     maximizePadding: "p-2",
-					topPosition: "clamp(85px, 12vh, 100px",
-                    marginTop: "clamp(12px, 2vh, 16px)"
+					topPosition: "clamp(85px, 12vh, 100px)",
+                    marginTop: "clamp(12px, 2vh, 16px)",
+					minimizedButtonSize: "50px"
                 });
             } else if (width <= 810) {
                 // Tablet medium
@@ -123,8 +128,9 @@ const SidePanel = ({
                     maximizeIconSize: "w-5 h-5",
                     minimizePadding: "p-2",
                     maximizePadding: "p-2", 
-					topPosition: "clamp(85px, 12vh, 100px",
-                    marginTop: "clamp(12px, 2vh, 16px)"
+					topPosition: "clamp(85px, 12vh, 100px)",
+                    marginTop: "clamp(12px, 2vh, 16px)",
+					minimizedButtonSize: "50px"
                 });
             } else if (width <= 1025) {
                 // Tablet besar
@@ -132,7 +138,8 @@ const SidePanel = ({
                     minimizeIconSize: "w-5 h-5",
                     maximizeIconSize: "w-6 h-6",
                     minimizePadding: "p-2",
-                    maximizePadding: "p-2"
+                    maximizePadding: "p-2",
+					minimizedButtonSize: "65px"
                 });
             } else {
                 // Desktop (default - ukuran terbesar)
@@ -140,7 +147,8 @@ const SidePanel = ({
                     minimizeIconSize: "w-5 h-5",
                     maximizeIconSize: "w-6 h-6",
                     minimizePadding: "p-2",
-                    maximizePadding: "p-2"
+                    maximizePadding: "p-2",
+					minimizedButtonSize: "65px"
                 });
             }
         };
@@ -172,16 +180,16 @@ const SidePanel = ({
                 }`}
                 style={{
                     top: responsiveConfig.topPosition || "clamp(65px, 9vh, 110px)",
-                    width: isMinimized ? "60px" : "33.33vw",
+                    width: isMinimized ? responsiveConfig.minimizedButtonSize : "33.33vw",
                     backgroundColor: isMinimized ? "#2A3A4E" : "#9DB2C8",
                     borderRadius: isMinimized ? "50%" : "16px 0 0 16px",
                     marginTop: isMinimized ? "20px" : (responsiveConfig.marginTop || "clamp(8px, 1vh, 16px)"),
                     marginRight: isMinimized ? "20px" : "0",
-                    minWidth: isMinimized ? "60px" : "320px",
-                    maxWidth: isMinimized ? "60px" : "600px",
+                    minWidth: isMinimized ? responsiveConfig.minimizedButtonSize : "320px",
+                    maxWidth: isMinimized ? responsiveConfig.minimizedButtonSize : "600px",
                     aspectRatio: isMinimized ? "1/1" : "auto",
                     height: isMinimized
-                        ? "60px"
+                        ? responsiveConfig.minimizedButtonSize
                         : `calc(100vh - ${responsiveConfig.topPosition || "clamp(65px, 9vh, 110px)"})`,
                     flexShrink: isMinimized ? 0 : "auto",
                 }}
