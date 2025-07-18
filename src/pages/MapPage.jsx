@@ -51,8 +51,13 @@ const MapPage = () => {
 	const [maximizeConfig, setMaximizeConfig] = useState({
 		buttonSize: "w-12 h-12",
 		iconSize: "w-6 h-6",
-		buttonPadding: "p-3"
+		buttonPadding: "p-3",
 	});
+
+	// Tambahkan state untuk header font size
+	const [headerFontSize, setHeaderFontSize] = useState(
+		"clamp(14px, 2vw, 24px)"
+	);
 
 	// Detect mobile screen
 	useEffect(() => {
@@ -61,40 +66,40 @@ const MapPage = () => {
 		};
 
 		window.addEventListener("resize", handleResize);
-		return () => window.removeEventListener("resize", handleResize);	
+		return () => window.removeEventListener("resize", handleResize);
 	}, []);
 
 	useEffect(() => {
 		const handleMaximizeResize = () => {
 			const width = window.innerWidth;
-			
+
 			if (width <= 320) {
 				setMaximizeConfig({
-					iconSize: "w-4 h-4", 
+					iconSize: "w-4 h-4",
 					buttonPadding: "p-1",
 					bottomPosition: "bottom-4",
-					rightPosition: "right-4"
+					rightPosition: "right-4",
 				});
 			} else if (width <= 420) {
 				setMaximizeConfig({
 					iconSize: "w-4 h-4",
 					buttonPadding: "p-1.5",
 					bottomPosition: "bottom-4",
-					rightPosition: "right-4"
+					rightPosition: "right-4",
 				});
 			} else if (width <= 610) {
 				setMaximizeConfig({
 					iconSize: "w-5 h-5",
 					buttonPadding: "p-2",
 					bottomPosition: "bottom-5",
-					rightPosition: "right-5"
+					rightPosition: "right-5",
 				});
 			} else if (width <= 810) {
 				setMaximizeConfig({
 					iconSize: "w-6 h-6",
-					buttonPadding: "p-2.5", 
+					buttonPadding: "p-2.5",
 					bottomPosition: "bottom-6",
-					rightPosition: "right-6"
+					rightPosition: "right-6",
 				});
 			} else {
 				// Desktop (default - ukuran terbesar)
@@ -102,7 +107,7 @@ const MapPage = () => {
 					iconSize: "w-6 h-6",
 					buttonPadding: "p-3",
 					bottomPosition: "bottom-6",
-					rightPosition: "right-6"
+					rightPosition: "right-6",
 				});
 			}
 		};
@@ -110,6 +115,22 @@ const MapPage = () => {
 		handleMaximizeResize();
 		window.addEventListener("resize", handleMaximizeResize);
 		return () => window.removeEventListener("resize", handleMaximizeResize);
+	}, []);
+
+	// Tambahkan useEffect untuk mengatur font size header
+	useEffect(() => {
+		const handleHeaderResize = () => {
+			const width = window.innerWidth;
+			if (width >= 887 && width <= 1067) {
+				setHeaderFontSize("clamp(14px, 1.5vw, 20px)");
+			} else {
+				setHeaderFontSize("clamp(14px, 2vw, 24px)"); // Ukuran default/original
+			}
+		};
+
+		handleHeaderResize();
+		window.addEventListener("resize", handleHeaderResize);
+		return () => window.removeEventListener("resize", handleHeaderResize);
 	}, []);
 
 	const filteredFacilities = useMemo(() => {
@@ -192,7 +213,7 @@ const MapPage = () => {
 							fontWeight: "700",
 							color: "#ECEFCA",
 							lineHeight: "1",
-							fontSize: "clamp(14px, 2vw, 24px)",
+							fontSize: headerFontSize,
 							width: "clamp(240px, 15vw, 400px)",
 							wordBreak: "break-word",
 						}}
