@@ -54,11 +54,6 @@ const MapPage = () => {
 		buttonPadding: "p-3",
 	});
 
-	// Tambahkan state untuk header font size
-	const [headerFontSize, setHeaderFontSize] = useState(
-		"clamp(14px, 2vw, 24px)"
-	);
-
 	// Tambahkan state untuk button styling
 	const [buttonConfig, setButtonConfig] = useState({
 		fontSize: "text-base",
@@ -67,6 +62,12 @@ const MapPage = () => {
 		height: "h-[60px]",
 		width: "w-[300px]",
 		gap: "gap-3",
+	});
+
+	// Tambahkan state untuk header style
+	const [headerStyle, setHeaderStyle] = useState({
+		fontSize: "clamp(14px, 2vw, 24px)",
+		wordBreak: "break-word",
 	});
 
 	// Detect mobile screen
@@ -131,10 +132,27 @@ const MapPage = () => {
 	useEffect(() => {
 		const handleHeaderResize = () => {
 			const width = window.innerWidth;
-			if (width >= 887 && width <= 1067) {
-				setHeaderFontSize("clamp(14px, 1.5vw, 20px)");
+			if (width >= 1043 && width <= 1167) {
+				setHeaderStyle({
+					fontSize: "clamp(16px, 1.7vw, 22px)",
+					wordBreak: "normal",
+					whiteSpace: "nowrap",
+				});
+			} else if (width >= 887 && width < 1043) {
+				setHeaderStyle({
+					fontSize: "clamp(16px, 1.7vw, 22px)",
+					wordBreak: "break-word",
+				});
+			} else if (width < 887) {
+				setHeaderStyle({
+					fontSize: "clamp(14px, 1.5vw, 20px)",
+					wordBreak: "break-word",
+				});
 			} else {
-				setHeaderFontSize("clamp(14px, 2vw, 24px)"); // Ukuran default/original
+				setHeaderStyle({
+					fontSize: "clamp(14px, 2vw, 24px)",
+					wordBreak: "break-word",
+				});
 			}
 		};
 
@@ -308,9 +326,10 @@ const MapPage = () => {
 							fontWeight: "700",
 							color: "#ECEFCA",
 							lineHeight: "1",
-							fontSize: headerFontSize,
+							fontSize: headerStyle.fontSize,
 							width: "clamp(240px, 15vw, 400px)",
-							wordBreak: "break-word",
+							wordBreak: headerStyle.wordBreak,
+							whiteSpace: headerStyle.whiteSpace,
 						}}
 					>
 						15 Minute's Semarang City

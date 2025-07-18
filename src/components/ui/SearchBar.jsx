@@ -1,7 +1,35 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 
 const SearchBar = ({ onSearch, onClear }) => {
 	const [query, setQuery] = useState("");
+	const [styles, setStyles] = useState({
+		height: "clamp(40px, 4.5vh, 60px)",
+		fontSize: "clamp(16px, 1.2vw, 20px)",
+		iconSize: "clamp(16px, 1.5vw, 24px)",
+	});
+
+	useEffect(() => {
+		const handleResize = () => {
+			const width = window.innerWidth;
+			if (width >= 811 && width <= 1167) {
+				setStyles({
+					height: "clamp(30px, 3.8vh, 35px)",
+					fontSize: "clamp(14px, 1vw, 16px)",
+					iconSize: "clamp(14px, 1.2vw, 20px)",
+				});
+			} else {
+				setStyles({
+					height: "clamp(40px, 4.5vh, 60px)",
+					fontSize: "clamp(16px, 1.2vw, 20px)",
+					iconSize: "clamp(16px, 1.5vw, 24px)",
+				});
+			}
+		};
+
+		handleResize();
+		window.addEventListener("resize", handleResize);
+		return () => window.removeEventListener("resize", handleResize);
+	}, []);
 
 	const handleSubmit = (e) => {
 		e.preventDefault();
@@ -22,11 +50,11 @@ const SearchBar = ({ onSearch, onClear }) => {
 				placeholder={query ? "" : "Telusuri Lokasi"}
 				className="w-full rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-light-blue focus:ring-opacity-50 transition-all duration-200 font-poppins"
 				style={{
-					height: "clamp(40px, 4.5vh, 60px)",
+					height: styles.height,
 					backgroundColor: "#ECEFCA",
 					color: "#213448",
 					fontWeight: "500",
-					fontSize: "clamp(16px, 1.2vw, 20px)",
+					fontSize: styles.fontSize,
 					paddingLeft: "clamp(20px, 1.5vw, 32px)",
 					paddingRight: query
 						? "clamp(80px, 7vw, 100px)"
@@ -43,8 +71,8 @@ const SearchBar = ({ onSearch, onClear }) => {
 						onClick={handleClear}
 						className="text-gray-600 hover:text-brand-dark-blue transition-colors duration-200 mr-2 md:mr-3"
 						style={{
-							width: "clamp(16px, 1.5vw, 24px)",
-							height: "clamp(16px, 1.5vw, 24px)",
+							width: styles.iconSize,
+							height: styles.iconSize,
 							padding: "0",
 						}}
 						aria-label="Clear search"
@@ -69,8 +97,8 @@ const SearchBar = ({ onSearch, onClear }) => {
 					type="submit"
 					className="text-gray-600 hover:text-brand-dark-blue transition-colors duration-200"
 					style={{
-						width: "clamp(16px, 1.5vw, 24px)",
-						height: "clamp(16px, 1.5vw, 24px)",
+						width: styles.iconSize,
+						height: styles.iconSize,
 						padding: "0",
 					}}
 					aria-label="Search"
