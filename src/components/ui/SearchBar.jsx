@@ -6,6 +6,7 @@ const SearchBar = ({ onSearch, onClear }) => {
 		height: "clamp(40px, 4.5vh, 60px)",
 		fontSize: "clamp(16px, 1.2vw, 20px)",
 		iconSize: "clamp(16px, 1.5vw, 24px)",
+		strokeWidth: 1.5,
 	});
 
 	useEffect(() => {
@@ -16,12 +17,14 @@ const SearchBar = ({ onSearch, onClear }) => {
 					height: "clamp(30px, 3.8vh, 35px)",
 					fontSize: "clamp(14px, 1vw, 16px)",
 					iconSize: "clamp(14px, 1.2vw, 20px)",
+					strokeWidth: 2,
 				});
 			} else {
 				setStyles({
 					height: "clamp(40px, 4.5vh, 60px)",
 					fontSize: "clamp(16px, 1.2vw, 20px)",
 					iconSize: "clamp(16px, 1.5vw, 24px)",
+					strokeWidth: 1.5,
 				});
 			}
 		};
@@ -81,7 +84,7 @@ const SearchBar = ({ onSearch, onClear }) => {
 							xmlns="http://www.w3.org/2000/svg"
 							fill="none"
 							viewBox="0 0 24 24"
-							strokeWidth={1.5}
+							strokeWidth={styles.strokeWidth}
 							stroke="currentColor"
 							className="w-full h-full"
 						>
@@ -107,7 +110,7 @@ const SearchBar = ({ onSearch, onClear }) => {
 						xmlns="http://www.w3.org/2000/svg"
 						fill="none"
 						viewBox="0 0 24 24"
-						strokeWidth={1.5}
+						strokeWidth={styles.strokeWidth}
 						stroke="currentColor"
 						className="w-full h-full"
 					>
