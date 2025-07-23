@@ -80,118 +80,93 @@ const SidePanel = ({
 		const handleResize = () => {
 			const width = window.innerWidth;
 
-			if (width <= 320) {
-				// Mobile sangat kecil
+			if (width <= 375) {
+				// 📱 Mobile Small - KECIL
 				setResponsiveConfig({
 					...responsiveConfig,
-					minimizeIconSize: "w-3 h-3",
-					maximizeIconSize: "w-4 h-4",
+					minimizeIconSize: "w-5 h-5",
+					maximizeIconSize: "w-5 h-5",
 					minimizePadding: "p-1",
 					maximizePadding: "p-1",
 					topPosition: "75px",
 					marginTop: "10px",
-					minimizedButtonSize: "35px",
-					headerFontSize: "text-[12px]",
-					listFontSize: "text-[11px]",
-					infoFontSize: "text-[11px]",
+					minimizedButtonSize: "50px",
+					headerFontSize: "text-[11px]",
+					listFontSize: "text-[10px]",
+					infoFontSize: "text-[10px]",
 				});
-			} else if (width <= 420) {
-				// Mobile kecil
+			} else if (width <= 414) {
+				// 📱 Mobile Medium - SEDANG
 				setResponsiveConfig({
 					...responsiveConfig,
-					minimizeIconSize: "w-4 h-4",
-					maximizeIconSize: "w-4 h-4",
+					minimizeIconSize: "w-6 h-6",
+					maximizeIconSize: "w-7 h-7",
 					minimizePadding: "p-1",
 					maximizePadding: "p-1",
 					topPosition: "clamp(75px, 10vh, 75px)",
 					marginTop: "clamp(10px, 1.5vh, 10px)",
-					minimizedButtonSize: "40px",
+					minimizedButtonSize: "60px",
 					headerFontSize: "text-[12px]",
 					listFontSize: "text-[11px]",
 					infoFontSize: "text-[11px]",
 				});
-			} else if (width <= 610) {
-				// Mobile medium
+			} else if (width <= 440) {
+				// 📱 Mobile Large - AGAK BESAR
 				setResponsiveConfig({
 					...responsiveConfig,
-					minimizeIconSize: "w-4 h-4",
-					maximizeIconSize: "w-5 h-5",
+					minimizeIconSize: "w-6 h-6",
+					maximizeIconSize: "w-7 h-7",
 					minimizePadding: "p-1.5",
 					maximizePadding: "p-1.5",
 					topPosition: "clamp(85px, 12vh, 100px)",
 					marginTop: "clamp(12px, 2vh, 16px)",
-					minimizedButtonSize: "45px",
-					headerFontSize: "text-[12px]", // Mengubah dari text-xs
-					listFontSize: "text-xs",
-					infoFontSize: "text-xs",
-				});
-			} else if (width <= 769) {
-				// Tablet kecil
-				setResponsiveConfig({
-					...responsiveConfig,
-					minimizeIconSize: "w-4 h-4",
-					maximizeIconSize: "w-5 h-5",
-					minimizePadding: "p-1.5",
-					maximizePadding: "p-2",
-					topPosition: "clamp(85px, 12vh, 100px)",
-					marginTop: "clamp(12px, 2vh, 16px)",
-					minimizedButtonSize: "50px",
-					headerFontSize: "text-sm",
-					listFontSize: "text-xs",
-					infoFontSize: "text-xs",
-				});
-			} else if (width <= 810) {
-				// Tablet medium
-				setResponsiveConfig({
-					...responsiveConfig,
-					minimizeIconSize: "w-5 h-5",
-					maximizeIconSize: "w-5 h-5",
-					minimizePadding: "p-2",
-					maximizePadding: "p-2",
-					topPosition: "clamp(85px, 12vh, 100px)",
-					marginTop: "clamp(12px, 2vh, 16px)",
-					minimizedButtonSize: "50px",
-					headerFontSize: "text-[12px]",
-					listFontSize: "text-[11px]",
-					infoFontSize: "text-[11px]",
-				});
-			} else if (width <= 983) {
-				setResponsiveConfig({
-					...responsiveConfig,
-					minimizeIconSize: "w-5 h-5",
-					maximizeIconSize: "w-5 h-5",
-					minimizePadding: "p-2",
-					maximizePadding: "p-2",
-					topPosition: "clamp(85px, 12vh, 100px)",
-					marginTop: "clamp(12px, 2vh, 16px)",
-					minimizedButtonSize: "50px",
-					headerFontSize: "text-[12px]",
-					listFontSize: "text-[11px]",
-					infoFontSize: "text-[11px]",
-				});
-			} else if (width <= 1178) {
-				// Tablet besar
-				setResponsiveConfig({
-					...responsiveConfig,
-					minimizeIconSize: "w-5 h-5",
-					maximizeIconSize: "w-6 h-6",
-					minimizePadding: "p-2",
-					maximizePadding: "p-2",
 					minimizedButtonSize: "65px",
+					headerFontSize: "text-[13px]",
+					listFontSize: "text-xs",
+					infoFontSize: "text-xs",
+				});
+			} else if (width <= 884) {
+				// 📊 Tablets - BESAR
+				setResponsiveConfig({
+					...responsiveConfig,
+					minimizeIconSize: "w-5 h-5",
+					maximizeIconSize: "w-8 h-8",
+					minimizePadding: "p-2",
+					maximizePadding: "p-2",
+					topPosition: "clamp(85px, 12vh, 100px)",
+					marginTop: "clamp(12px, 2vh, 16px)",
+					minimizedButtonSize: "75px",
 					headerFontSize: "text-sm",
 					listFontSize: "text-sm",
 					infoFontSize: "text-sm",
 				});
+			} else if (width >= 1280) {
+				// 💻 Laptops - PALING BESAR
+				setResponsiveConfig({
+					...responsiveConfig,
+					minimizeIconSize: "w-6 h-6",
+					maximizeIconSize: "w-8 h-8",
+					minimizePadding: "p-2.5",
+					maximizePadding: "p-2.5",
+					topPosition: "clamp(65px, 9vh, 110px)",
+					marginTop: "clamp(8px, 1vh, 16px)",
+					minimizedButtonSize: "65px",
+					headerFontSize: "text-base",
+					listFontSize: "text-sm",
+					infoFontSize: "text-sm",
+				});
 			} else {
-				// Desktop (default - ukuran terbesar)
+				// Default untuk ukuran diantara tablet dan laptop (885px-1279px)
 				setResponsiveConfig({
 					...responsiveConfig,
 					minimizeIconSize: "w-5 h-5",
-					maximizeIconSize: "w-6 h-6",
+					maximizeIconSize: "w-7 h-7",
 					minimizePadding: "p-2",
 					maximizePadding: "p-2",
-					minimizedButtonSize: "65px",
-					headerFontSize: "text-base",
+					topPosition: "clamp(85px, 12vh, 100px)",
+					marginTop: "clamp(12px, 2vh, 16px)",
+					minimizedButtonSize: "60px",
+					headerFontSize: "text-sm",
 					listFontSize: "text-sm",
 					infoFontSize: "text-sm",
 				});

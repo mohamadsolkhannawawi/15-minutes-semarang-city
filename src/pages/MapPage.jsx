@@ -49,9 +49,11 @@ const MapPage = () => {
 	const mapRef = useRef(null);
 
 	const [maximizeConfig, setMaximizeConfig] = useState({
-		buttonSize: "w-12 h-12",
+		// buttonSize: "w-12 h-12",
 		iconSize: "w-6 h-6",
 		buttonPadding: "p-3",
+		bottomPosition: "bottom-6",
+		rightPosition: "right-6",
 	});
 
 	// Tambahkan state untuk button styling
@@ -59,6 +61,8 @@ const MapPage = () => {
 		fontSize: "text-base",
 		padding: "py-4 px-6",
 		iconSize: "w-6 h-6",
+		buttonWidth: "48px",        // ← TAMBAH INI
+    	buttonHeight: "48px",       // ← TAMBAH INI
 		height: "h-[60px]",
 		width: "w-[300px]",
 		gap: "gap-3",
@@ -83,40 +87,64 @@ const MapPage = () => {
 	useEffect(() => {
 		const handleMaximizeResize = () => {
 			const width = window.innerWidth;
-
-			if (width <= 320) {
+		
+			if (width <= 375) {
+				// 📱 Mobile Small - Tombol BESAR (layar kecil butuh tombol besar)
 				setMaximizeConfig({
-					iconSize: "w-4 h-4",
-					buttonPadding: "p-1",
+					iconSize: "w-7 h-7",
+					buttonPadding: "p-4",
+					buttonWidth: "56px", 
+					buttonHeight: "56px",
 					bottomPosition: "bottom-4",
 					rightPosition: "right-4",
 				});
-			} else if (width <= 420) {
+			} else if (width <= 414) {
+				// 📱 Mobile Medium - Sedikit lebih kecil
 				setMaximizeConfig({
-					iconSize: "w-4 h-4",
-					buttonPadding: "p-1.5",
+					iconSize: "w-6 h-6",
+					buttonPadding: "p-3.5",
+					buttonWidth: "48px", 
+					buttonHeight: "48px",
 					bottomPosition: "bottom-4",
 					rightPosition: "right-4",
 				});
-			} else if (width <= 610) {
+			} else if (width <= 440) {
+				// 📱 Mobile Large - Ukuran sedang
 				setMaximizeConfig({
-					iconSize: "w-5 h-5",
-					buttonPadding: "p-2",
+					iconSize: "w-6 h-6",
+					buttonPadding: "p-3",
+					buttonWidth: "44px", 
+					buttonHeight: "44px",
 					bottomPosition: "bottom-5",
 					rightPosition: "right-5",
 				});
-			} else if (width <= 810) {
+			} else if (width <= 884) {
+				// 📊 Tablets - Lebih kecil
 				setMaximizeConfig({
-					iconSize: "w-6 h-6",
+					iconSize: "w-5 h-5",
+					buttonPadding: "p-3",
+					buttonWidth: "40px", 
+					buttonHeight: "40px",
+					bottomPosition: "bottom-5",
+					rightPosition: "right-5",
+				});
+			} else if (width >= 1280) {
+				// 💻 Laptops - Tombol KECIL (layar besar butuh tombol kecil)
+				setMaximizeConfig({
+					iconSize: "w-5 h-5",
 					buttonPadding: "p-2.5",
+					buttonWidth: "36px", 
+					buttonHeight: "36px",
 					bottomPosition: "bottom-6",
 					rightPosition: "right-6",
 				});
 			} else {
-				// Desktop (default - ukuran terbesar)
+				// Default untuk ukuran diantara tablet dan laptop (885px-1279px)
 				setMaximizeConfig({
-					iconSize: "w-6 h-6",
+					iconSize: "w-5 h-5",
 					buttonPadding: "p-3",
+					buttonWidth: "40px", 
+					buttonHeight: "40px",
 					bottomPosition: "bottom-6",
 					rightPosition: "right-6",
 				});
@@ -399,8 +427,6 @@ const MapPage = () => {
 					)}
 					style={{
 						width: buttonConfig.width,
-						// maxWidth: buttonConfig.maxWidth || "90vw",
-						// minWidth: "280px",
 					}}
 				>
 					<button
@@ -480,6 +506,10 @@ const MapPage = () => {
 							maximizeConfig.bottomPosition,
 							maximizeConfig.rightPosition
 						)}
+						style={{
+							width: maximizeConfig.buttonWidth,  
+							height: maximizeConfig.buttonHeight, 
+						}}
 						onClick={() => setSelectedFacility(null)}
 						aria-label="Tampilkan daftar fasilitas"
 					>
