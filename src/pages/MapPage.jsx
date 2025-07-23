@@ -132,26 +132,45 @@ const MapPage = () => {
 	useEffect(() => {
 		const handleHeaderResize = () => {
 			const width = window.innerWidth;
-			if (width >= 1043 && width <= 1167) {
+			
+			if (width <= 375) {
+				// 📱 Mobile Small
 				setHeaderStyle({
-					fontSize: "clamp(16px, 1.7vw, 22px)",
+					fontSize: "clamp(14px, 1.5vw, 18px)",
+					wordBreak: "break-word",
+				});
+			} else if (width <= 414) {
+				// 📱 Mobile Medium
+				setHeaderStyle({
+					fontSize: "clamp(15px, 1.6vw, 19px)",
+					wordBreak: "break-word",
+				});
+			} else if (width <= 440) {
+				// 📱 Mobile Large
+				setHeaderStyle({
+					fontSize: "clamp(16px, 1.7vw, 20px)",
+					wordBreak: "break-word",
+				});
+			} else if (width <= 884) {
+				// 📊 Tablets
+				setHeaderStyle({
+					fontSize: "clamp(20px, 2vw, 24px)",
 					wordBreak: "normal",
 					whiteSpace: "nowrap",
 				});
-			} else if (width >= 887 && width < 1043) {
+			} else if (width >= 1280) {
+				// 💻 Laptops
 				setHeaderStyle({
-					fontSize: "clamp(16px, 1.7vw, 22px)",
-					wordBreak: "break-word",
-				});
-			} else if (width < 887) {
-				setHeaderStyle({
-					fontSize: "clamp(14px, 1.5vw, 20px)",
-					wordBreak: "break-word",
+					fontSize: "clamp(20px, 2vw, 24px)",
+					wordBreak: "normal",
+					whiteSpace: "nowrap",
 				});
 			} else {
+				// Default untuk ukuran diantara tablet dan laptop (885px-1279px)
 				setHeaderStyle({
-					fontSize: "clamp(14px, 2vw, 24px)",
-					wordBreak: "break-word",
+					fontSize: "clamp(20px, 2vw, 24px)",
+					wordBreak: "normal",
+					whiteSpace: "nowrap",
 				});
 			}
 		};
@@ -166,77 +185,65 @@ const MapPage = () => {
 		const handleButtonResize = () => {
 			const width = window.innerWidth;
 
-			if (width <= 340) {
+			if (width <= 375) {
+				// 📱 Mobile Small
 				setButtonConfig({
-					fontSize: "text-[10px]",
-					padding: "py-1.5 px-2",
-					iconSize: "w-3.5 h-3.5",
-					height: "h-[40px]",
-					width: "w-[200px]",
-					gap: "gap-1",
-				});
-			} else if (width <= 420) {
-				setButtonConfig({
-					fontSize: "text-[11px]",
+					fontSize: "text-[16px]",
 					padding: "py-2 px-3",
-					iconSize: "w-4 h-4",
-					height: "h-[40px]",
-					width: "w-[220px]",
-					gap: "gap-1.5",
-				});
-			} else if (width <= 610) {
-				setButtonConfig({
-					fontSize: "text-[11px]",
-					padding: "py-2 px-3",
-					iconSize: "w-4 h-4",
-					height: "h-[42px]",
-					width: "w-[225px]",
-					gap: "gap-1.5",
-				});
-			} else if (width <= 769) {
-				setButtonConfig({
-					fontSize: "text-[13px]",
-					padding: "py-3 px-4",
-					iconSize: "w-5 h-5",
-					height: "h-[48px]",
-					width: "w-[260px]",
-					gap: "gap-2",
-				});
-			} else if (width <= 810) {
-				setButtonConfig({
-					fontSize: "text-[13px]",
-					padding: "py-3 px-5",
-					iconSize: "w-5 h-5",
-					height: "h-[50px]",
-					width: "w-[270px]",
-					gap: "gap-2",
-				});
-			} else if (width <= 983) {
-				setButtonConfig({
-					fontSize: "text-[13px]",
-					padding: "py-2.5 px-4",
-					iconSize: "w-5 h-5",
+					iconSize: "w-6 h-6",
 					height: "h-[45px]",
-					width: "w-[250px]",
-					gap: "gap-2",
+					width: "70vw",
+					gap: "gap-1.5",
 				});
-			} else if (width <= 1178) {
+			} else if (width <= 414) {
+				// 📱 Mobile Medium
 				setButtonConfig({
-					fontSize: "text-[14px]",
+					fontSize: "text-[18px]",
+					padding: "py-2 px-3",
+					iconSize: "w-7 h-7",
+					height: "h-[42px]",
+					width: "70vw",
+					gap: "gap-1.5",
+				});
+			} else if (width <= 440) {
+				// 📱 Mobile Large
+				setButtonConfig({
+					fontSize: "text-[16px]",
+					padding: "py-2 px-3",
+					iconSize: "w-6 h-6",
+					height: "h-[44px]",
+					width: "60vw",
+					gap: "gap-1.5",
+				});
+			} else if (width <= 884) {
+				// 📊 Tablets
+				setButtonConfig({
+					fontSize: "text-[24px]",
 					padding: "py-3 px-4",
-					iconSize: "w-5 h-5",
-					height: "h-[48px]",
-					width: "w-[260px]",
+					iconSize: "w-10 h-10",
+					height: "h-[50px]",
+					width: "55vw",
 					gap: "gap-2",
 				});
-			} else {
+			} else if (width >= 1280) {
+				// 💻 Laptops
 				setButtonConfig({
 					fontSize: "text-base",
 					padding: "py-4 px-6",
 					iconSize: "w-6 h-6",
 					height: "h-[60px]",
-					width: "w-[300px]",
+					width: "320px",
 					gap: "gap-3",
+				});
+			} else {
+				// Default untuk ukuran diantara tablet dan laptop (885px-1279px)
+				setButtonConfig({
+					fontSize: "text-[14px]",
+					padding: "py-3 px-5",
+					iconSize: "w-5 h-5",
+					height: "h-[52px]",
+					width: "300px",
+					gap: "gap-2.5",
 				});
 			}
 		};
@@ -392,7 +399,8 @@ const MapPage = () => {
 					)}
 					style={{
 						width: buttonConfig.width,
-						maxWidth: "90vw",
+						// maxWidth: buttonConfig.maxWidth || "90vw",
+						// minWidth: "280px",
 					}}
 				>
 					<button
