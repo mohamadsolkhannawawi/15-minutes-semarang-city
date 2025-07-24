@@ -41,9 +41,10 @@ const MainPage = ({ onCheckLocation }) => {
 			let newStyles = { ...styles };
 
 			if (width <= 320) {
+				// 📱 Mobile Extra Small (<=320px)
 				newStyles = {
 					header: {
-						fontSize: "16px",
+						fontSize: "20px",
 						top: "40px",
 						marginX: "16px",
 						textShadow: `
@@ -61,17 +62,50 @@ const MainPage = ({ onCheckLocation }) => {
 						padding: "16px",
 						marginX: "16px",
 						top: "140px",
-						gap: "16px",
+						gap: "30px",
 					},
 					button: {
 						fontSize: "14px",
 						height: "40px",
 						padding: "20px",
 						iconSize: "16px",
-						width: "100%",
+						width: "100%", // Full width untuk mobile
 					},
 				};
-			} else if (width <= 420) {
+			} else if (width <= 375) {
+				// 📱 Mobile Small (<=375px)
+				newStyles = {
+					header: {
+						fontSize: "20px",
+						top: "40px",
+						marginX: "16px",
+						textShadow: `
+							-0.5px -0.5px 0 #F0EAD6,
+							0.5px -0.5px 0 #F0EAD6,
+							-0.5px 0.5px 0 #F0EAD6,
+							0.5px 0.5px 0 #F0EAD6,
+							-1px -1px 0 #F0EAD6,
+							1px -1px 0 #F0EAD6,
+							-1px 1px 0 #F0EAD6,
+							1px 1px 0 #F0EAD6`,
+					},
+					description: {
+						fontSize: "14px",
+						padding: "16px",
+						marginX: "16px",
+						top: "160px",
+						gap: "30px",
+					},
+					button: {
+						fontSize: "14px",
+						height: "40px",
+						padding: "20px",
+						iconSize: "16px",
+						width: "100%", // Full width untuk mobile
+					},
+				};
+			} else if (width <= 414) {
+				// 📱 Mobile Medium (375px-414px)
 				newStyles = {
 					header: {
 						fontSize: "25px",
@@ -92,22 +126,23 @@ const MainPage = ({ onCheckLocation }) => {
 						padding: "20px",
 						marginX: "20px",
 						top: "160px",
-						gap: "20px",
+						gap: "30px",
 					},
 					button: {
 						fontSize: "14px",
 						height: "45px",
 						padding: "20px",
 						iconSize: "18px",
-						width: "75%",
+						width: "100%", // Full width untuk mobile
 					},
 				};
-			} else if (width <= 610) {
+			} else if (width <= 767) {
+				// 📱 Mobile Large (414px-767px)
 				newStyles = {
 					header: {
-						fontSize: "26px",
-						top: "60px",
-						marginX: "24px",
+						fontSize: "clamp(26px, 4vw, 32px)",
+						top: "clamp(60px, 8vh, 75px)",
+						marginX: "clamp(24px, 4vw, 32px)",
 						textShadow: `
 							-1px -1px 0 #F0EAD6,
 							1px -1px 0 #F0EAD6,
@@ -119,26 +154,27 @@ const MainPage = ({ onCheckLocation }) => {
 							1.5px 1.5px 0 #F0EAD6`,
 					},
 					description: {
-						fontSize: "15px",
-						padding: "24px",
-						marginX: "24px",
-						top: "180px",
-						gap: "24px",
+						fontSize: "clamp(15px, 2.5vw, 18px)",
+						padding: "clamp(24px, 3vw, 32px)",
+						marginX: "clamp(24px, 4vw, 32px)",
+						top: "clamp(180px, 25vh, 220px)",
+						gap: "clamp(24px, 3vh, 32px)",
 					},
 					button: {
-						fontSize: "15px",
-						height: "50px",
-						padding: "24px",
-						iconSize: "20px",
-						width: "auto",
+						fontSize: "clamp(15px, 2.2vw, 17px)",
+						height: "clamp(50px, 7vh, 60px)",
+						padding: "clamp(24px, 3vw, 32px)",
+						iconSize: "clamp(20px, 3vw, 26px)",
+						width: "100%", // Full width untuk mobile
 					},
 				};
-			} else if (width <= 769) {
+			} else if (width <= 884) {
+				// 📊 Tablets (768px-884px)
 				newStyles = {
 					header: {
-						fontSize: "40px",
-						top: "70px",
-						marginX: "32px",
+						fontSize: "48px",
+						top: "100px", // Tambah jarak dari atas
+						marginX: "50px",
 						textShadow: `
 							-1.25px -1.25px 0 #F0EAD6,
 							1.25px -1.25px 0 #F0EAD6,
@@ -150,117 +186,25 @@ const MainPage = ({ onCheckLocation }) => {
 							2px 2px 0 #F0EAD6`,
 					},
 					description: {
-						fontSize: "16px",
-						padding: "28px",
-						marginX: "32px",
-						top: "190px",
-						gap: "28px",
-					},
-					button: {
-						fontSize: "16px",
-						height: "55px",
-						padding: "28px",
-						iconSize: "24px",
-						width: "auto",
-					},
-				};
-			} else if (width <= 810) {
-				newStyles = {
-					header: {
-						fontSize: "42.5px",
-						top: "80px",
-						marginX: "40px",
-						textShadow: `
-							-1.5px -1.5px 0 #F0EAD6,
-							1.5px -1.5px 0 #F0EAD6,
-							-1.5px 1.5px 0 #F0EAD6,
-							1.5px 1.5px 0 #F0EAD6,
-							-2.5px -2.5px 0 #F0EAD6,
-							2.5px -2.5px 0 #F0EAD6,
-							-2.5px 2.5px 0 #F0EAD6,
-							2.5px 2.5px 0 #F0EAD6`,
-					},
-					description: {
-						fontSize: "17px",
-						padding: "32px",
-						marginX: "40px",
-						top: "200px",
-						gap: "32px",
-					},
-					button: {
-						fontSize: "16px",
-						height: "60px",
-						padding: "32px",
-						iconSize: "26px",
-						width: "auto",
-					},
-				};
-			} else if (width <= 983) {
-				newStyles = {
-					header: {
-						fontSize: "45px",
-						top: "90px",
-						marginX: "48px",
-						textShadow: `
-							-1.75px -1.75px 0 #F0EAD6,
-							1.75px -1.75px 0 #F0EAD6,
-							-1.75px 1.75px 0 #F0EAD6,
-							1.75px 1.75px 0 #F0EAD6,
-							-2.75px -2.75px 0 #F0EAD6,
-							2.75px -2.75px 0 #F0EAD6,
-							-2.75px 2.75px 0 #F0EAD6,
-							2.75px 2.75px 0 #F0EAD6`,
-					},
-					description: {
-						fontSize: "18px",
-						padding: "36px",
-						marginX: "48px",
-						top: "220px",
-						gap: "36px",
-					},
-					button: {
-						fontSize: "17px",
-						height: "65px",
-						padding: "36px",
-						iconSize: "28px",
-						width: "auto",
-					},
-				};
-			} else if (width <= 1178) {
-				newStyles = {
-					header: {
-						fontSize: "45px",
-						top: "100px",
-						marginX: "60px",
-						textShadow: `
-							-2px -2px 0 #F0EAD6,
-							2px -2px 0 #F0EAD6,
-							-2px 2px 0 #F0EAD6,
-							2px 2px 0 #F0EAD6,
-							-3px -3px 0 #F0EAD6,
-							3px -3px 0 #F0EAD6,
-							-3px 3px 0 #F0EAD6,
-							3px 3px 0 #F0EAD6`,
-					},
-					description: {
-						fontSize: "20px",
+						fontSize: "22px", // Perbesar font description
 						padding: "40px",
-						marginX: "60px",
-						top: "240px",
-						gap: "40px",
+						marginX: "50px",
+						top: "280px", // Tambah jarak dari header
+						gap: "50px", // Tambah gap antara description dan button
 					},
 					button: {
-						fontSize: "18px",
-						height: "70px",
-						padding: "40px",
-						iconSize: "30px",
+						fontSize: "20px", // Perbesar font button
+						height: "75px", // Perbesar tinggi button
+						padding: "45px", // Perbesar padding
+						iconSize: "32px", // Perbesar icon
 						width: "auto",
 					},
 				};
 			} else {
+				// 💻 Laptops (1280px+)
 				newStyles = {
 					header: {
-						fontSize: "clamp(16px, 4vw, 56px)",
+						fontSize: "clamp(45px, 4vw, 56px)",
 						top: "clamp(75px, 10vh, 140px)",
 						marginX: "clamp(20px, 8.3vw, 120px)",
 						textShadow: `
