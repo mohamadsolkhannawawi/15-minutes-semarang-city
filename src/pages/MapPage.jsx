@@ -61,8 +61,8 @@ const MapPage = () => {
 		fontSize: "text-base",
 		padding: "py-4 px-6",
 		iconSize: "w-6 h-6",
-		buttonWidth: "48px",        // ← TAMBAH INI
-    	buttonHeight: "48px",       // ← TAMBAH INI
+		buttonWidth: "48px", // ← TAMBAH INI
+		buttonHeight: "48px", // ← TAMBAH INI
 		height: "h-[60px]",
 		width: "w-[300px]",
 		gap: "gap-3",
@@ -87,15 +87,15 @@ const MapPage = () => {
 	useEffect(() => {
 		const handleMaximizeResize = () => {
 			const width = window.innerWidth;
-		
+
 			if (width <= 375) {
 				// 📱 Mobile Small - Tombol BESAR (layar kecil butuh tombol besar)
 				setMaximizeConfig({
 					iconSize: "w-7 h-7",
 					buttonPadding: "p-4",
-					buttonWidth: "56px", 
+					buttonWidth: "56px",
 					buttonHeight: "56px",
-					bottomPosition: "bottom-4",
+					bottomPosition: "bottom-[calc(env(safe-area-inset-bottom,0px)+60px)]",
 					rightPosition: "right-4",
 				});
 			} else if (width <= 414) {
@@ -103,9 +103,9 @@ const MapPage = () => {
 				setMaximizeConfig({
 					iconSize: "w-6 h-6",
 					buttonPadding: "p-3.5",
-					buttonWidth: "48px", 
+					buttonWidth: "48px",
 					buttonHeight: "48px",
-					bottomPosition: "bottom-4",
+					bottomPosition: "bottom-[calc(env(safe-area-inset-bottom,0px)+60px)]",
 					rightPosition: "right-4",
 				});
 			} else if (width <= 440) {
@@ -113,9 +113,9 @@ const MapPage = () => {
 				setMaximizeConfig({
 					iconSize: "w-6 h-6",
 					buttonPadding: "p-3",
-					buttonWidth: "44px", 
+					buttonWidth: "44px",
 					buttonHeight: "44px",
-					bottomPosition: "bottom-5",
+					bottomPosition: "bottom-[calc(env(safe-area-inset-bottom,0px)+60px)]",
 					rightPosition: "right-5",
 				});
 			} else if (width <= 884) {
@@ -123,9 +123,9 @@ const MapPage = () => {
 				setMaximizeConfig({
 					iconSize: "w-5 h-5",
 					buttonPadding: "p-3",
-					buttonWidth: "40px", 
+					buttonWidth: "40px",
 					buttonHeight: "40px",
-					bottomPosition: "bottom-5",
+					bottomPosition: "bottom-[calc(env(safe-area-inset-bottom,0px)+60px)]",
 					rightPosition: "right-5",
 				});
 			} else if (width >= 1280) {
@@ -133,7 +133,7 @@ const MapPage = () => {
 				setMaximizeConfig({
 					iconSize: "w-5 h-5",
 					buttonPadding: "p-2.5",
-					buttonWidth: "36px", 
+					buttonWidth: "36px",
 					buttonHeight: "36px",
 					bottomPosition: "bottom-6",
 					rightPosition: "right-6",
@@ -143,7 +143,7 @@ const MapPage = () => {
 				setMaximizeConfig({
 					iconSize: "w-5 h-5",
 					buttonPadding: "p-3",
-					buttonWidth: "40px", 
+					buttonWidth: "40px",
 					buttonHeight: "40px",
 					bottomPosition: "bottom-6",
 					rightPosition: "right-6",
@@ -160,7 +160,7 @@ const MapPage = () => {
 	useEffect(() => {
 		const handleHeaderResize = () => {
 			const width = window.innerWidth;
-			
+
 			if (width <= 375) {
 				// 📱 Mobile Small
 				setHeaderStyle({
@@ -422,7 +422,7 @@ const MapPage = () => {
 
 				<div
 					className={clsx(
-						"absolute bottom-4 sm:bottom-6 lg:bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col gap-3 sm:gap-4 transition-opacity duration-300",
+						"absolute bottom-[calc(env(safe-area-inset-bottom,0px)+80px)] sm:bottom-6 lg:bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col gap-3 sm:gap-4 transition-opacity duration-300",
 						{ "opacity-0 pointer-events-none": showResults }
 					)}
 					style={{
@@ -498,7 +498,7 @@ const MapPage = () => {
 				/>
 
 				{/* Tombol Maximize untuk Mobile */}
-				{isMobile && showResults && (
+				{isMobile && showResults && !selectedFacility && (
 					<button
 						className={clsx(
 							"fixed z-30 bg-brand-accent text-brand-dark-blue rounded-full shadow-lg hover:bg-brand-light-blue transition-all duration-200 flex items-center justify-center",
@@ -507,8 +507,8 @@ const MapPage = () => {
 							maximizeConfig.rightPosition
 						)}
 						style={{
-							width: maximizeConfig.buttonWidth,  
-							height: maximizeConfig.buttonHeight, 
+							width: maximizeConfig.buttonWidth,
+							height: maximizeConfig.buttonHeight,
 						}}
 						onClick={() => setSelectedFacility(null)}
 						aria-label="Tampilkan daftar fasilitas"

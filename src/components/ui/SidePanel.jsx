@@ -181,7 +181,18 @@ const SidePanel = ({
 
 	const toggleMinimize = () => {
 		setIsMinimized(!isMinimized);
+		// Reset isMinimized when panel is closed
+		if (!isVisible) {
+			setIsMinimized(false);
+		}
 	};
+
+	// Add effect to reset minimize state when panel visibility changes
+	useEffect(() => {
+		if (!isVisible) {
+			setIsMinimized(false);
+		}
+	}, [isVisible]);
 
 	return (
 		<>

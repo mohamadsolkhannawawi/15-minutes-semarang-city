@@ -118,6 +118,13 @@
 		width: clamp(200px, 85vw, 300px) !important;
 		flex-direction: column !important;
 		gap: 12px !important;
+		margin-bottom: env(safe-area-inset-bottom, 16px) !important;
+		padding-bottom: 60px !important; /* Add padding to account for mobile nav */
+	}
+
+	/* Adjust button container for mobile */
+	.absolute.bottom-\[calc\(env\(safe-area-inset-bottom\,0px\)\+80px\)\] {
+		bottom: calc(env(safe-area-inset-bottom, 0px) + 80px) !important;
 	}
 
 	.map-page-button-mobile {
