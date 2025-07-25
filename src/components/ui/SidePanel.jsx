@@ -79,11 +79,26 @@ const SidePanel = ({
 	useEffect(() => {
 		const handleResize = () => {
 			const width = window.innerWidth;
+			const height = window.innerHeight;
+			const isLandscape = width > height;
 
-			if (width <= 375) {
-				// 📱 Mobile Small - KECIL
+			if (isLandscape && width <= 926) {
+				// Landscape mobile - ukuran lebih kecil
 				setResponsiveConfig({
-					...responsiveConfig,
+					minimizeIconSize: "w-4 h-4",
+					maximizeIconSize: "w-4 h-4",
+					minimizePadding: "p-2",
+					maximizePadding: "p-2",
+					minimizedButtonSize: "40px",
+					headerFontSize: "text-[12px]",
+					listFontSize: "text-[11px]",
+					infoFontSize: "text-[11px]",
+					topPosition: "clamp(65px, 9vh, 75px)",
+					marginTop: "8px",
+				});
+			} else if (width <= 375) {
+				// Keep existing mobile styles
+				setResponsiveConfig({
 					minimizeIconSize: "w-5 h-5",
 					maximizeIconSize: "w-5 h-5",
 					minimizePadding: "p-1",
@@ -96,9 +111,8 @@ const SidePanel = ({
 					infoFontSize: "text-[10px]",
 				});
 			} else if (width <= 414) {
-				// 📱 Mobile Medium - SEDANG
+				// Keep existing mobile styles
 				setResponsiveConfig({
-					...responsiveConfig,
 					minimizeIconSize: "w-6 h-6",
 					maximizeIconSize: "w-7 h-7",
 					minimizePadding: "p-1",
@@ -110,72 +124,25 @@ const SidePanel = ({
 					listFontSize: "text-[11px]",
 					infoFontSize: "text-[11px]",
 				});
-			} else if (width <= 440) {
-				// 📱 Mobile Large - AGAK BESAR
+			} else {
+				// Keep all existing styles for other screen sizes
 				setResponsiveConfig({
-					...responsiveConfig,
-					minimizeIconSize: "w-6 h-6",
-					maximizeIconSize: "w-7 h-7",
-					minimizePadding: "p-1.5",
-					maximizePadding: "p-1.5",
-					topPosition: "clamp(85px, 12vh, 100px)",
-					marginTop: "clamp(12px, 2vh, 16px)",
-					minimizedButtonSize: "65px",
-					headerFontSize: "text-[13px]",
-					listFontSize: "text-xs",
-					infoFontSize: "text-xs",
-				});
-			} else if (width <= 884) {
-				// 📊 Tablets - BESAR
-				setResponsiveConfig({
-					...responsiveConfig,
 					minimizeIconSize: "w-5 h-5",
-					maximizeIconSize: "w-8 h-8",
+					maximizeIconSize: "w-6 h-6",
 					minimizePadding: "p-2",
 					maximizePadding: "p-2",
-					topPosition: "clamp(85px, 12vh, 100px)",
-					marginTop: "clamp(12px, 2vh, 16px)",
-					minimizedButtonSize: "75px",
-					headerFontSize: "text-sm",
-					listFontSize: "text-sm",
-					infoFontSize: "text-sm",
-				});
-			} else if (width >= 1280) {
-				// 💻 Laptops - PALING BESAR
-				setResponsiveConfig({
-					...responsiveConfig,
-					minimizeIconSize: "w-6 h-6",
-					maximizeIconSize: "w-8 h-8",
-					minimizePadding: "p-2.5",
-					maximizePadding: "p-2.5",
-					topPosition: "clamp(65px, 9vh, 110px)",
-					marginTop: "clamp(8px, 1vh, 16px)",
-					minimizedButtonSize: "65px",
+					minimizedButtonSize: "60px",
 					headerFontSize: "text-base",
 					listFontSize: "text-sm",
 					infoFontSize: "text-sm",
-				});
-			} else {
-				// Default untuk ukuran diantara tablet dan laptop (885px-1279px)
-				setResponsiveConfig({
-					...responsiveConfig,
-					minimizeIconSize: "w-5 h-5",
-					maximizeIconSize: "w-7 h-7",
-					minimizePadding: "p-2",
-					maximizePadding: "p-2",
-					topPosition: "clamp(85px, 12vh, 100px)",
-					marginTop: "clamp(12px, 2vh, 16px)",
-					minimizedButtonSize: "60px",
-					headerFontSize: "text-sm",
-					listFontSize: "text-sm",
-					infoFontSize: "text-sm",
+					topPosition: "clamp(65px, 9vh, 110px)",
+					marginTop: "clamp(8px, 1vh, 16px)",
 				});
 			}
 		};
 
-		handleResize(); // Set initial size
+		handleResize();
 		window.addEventListener("resize", handleResize);
-
 		return () => window.removeEventListener("resize", handleResize);
 	}, []);
 
@@ -220,7 +187,7 @@ const SidePanel = ({
 					marginRight: isMinimized ? "20px" : "0",
 					minWidth: isMinimized
 						? responsiveConfig.minimizedButtonSize
-						: "320px",
+						: "280px", // Reduced from 320px for landscape
 					maxWidth: isMinimized
 						? responsiveConfig.minimizedButtonSize
 						: "600px",
