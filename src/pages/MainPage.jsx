@@ -42,7 +42,7 @@ const MainPage = ({ onCheckLocation }) => {
 				newStyles = {
 					header: {
 						fontSize: "clamp(28px, 4vw, 32px)", // Increased from 18px
-						top: "clamp(30px, 5vh, 40px)",
+						top: "clamp(20px, 3vh, 25px)", // Reduced from 30px-40px to 20px-25px
 						marginX: "clamp(20px, 4vw, 30px)",
 						textShadow: `-1px -1px 0 #F0EAD6, 1px -1px 0 #F0EAD6, -1px 1px 0 #F0EAD6, 1px 1px 0 #F0EAD6`,
 					},
@@ -50,8 +50,8 @@ const MainPage = ({ onCheckLocation }) => {
 						fontSize: "clamp(16px, 2vw, 18px)", // Increased from 12px
 						padding: "clamp(16px, 2.5vw, 20px)",
 						marginX: "clamp(20px, 4vw, 30px)",
-						top: "clamp(120px, 20vh, 140px)",
-						gap: "clamp(20px, 3vh, 28px)",
+						top: "clamp(110px, 22vh, 130px)", // Adjusted to create more space from header
+						gap: "clamp(16px, 2.5vh, 20px)", // Slightly reduced gap to maintain button position
 					},
 					button: {
 						fontSize: "clamp(16px, 2vw, 18px)", // Increased from 12px
