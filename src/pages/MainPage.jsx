@@ -13,11 +13,7 @@ const MainPage = ({ onCheckLocation }) => {
 				-1px -1px 0 #F0EAD6,
 				1px -1px 0 #F0EAD6,
 				-1px 1px 0 #F0EAD6,
-				1px 1px 0 #F0EAD6,
-				-2px -2px 0 #F0EAD6,
-				2px -2px 0 #F0EAD6,
-				-2px 2px 0 #F0EAD6,
-				2px 2px 0 #F0EAD6`,
+				1px 1px 0 #F0EAD6`,
 		},
 		description: {
 			fontSize: "clamp(12px, 1.8vw, 26px)",
@@ -38,9 +34,34 @@ const MainPage = ({ onCheckLocation }) => {
 	useEffect(() => {
 		const handleResize = () => {
 			const width = window.innerWidth;
+			const height = window.innerHeight;
+			const isLandscape = width > height;
 			let newStyles = { ...styles };
 
-			if (width <= 320) {
+			if (isLandscape && width <= 926) {
+				newStyles = {
+					header: {
+						fontSize: "clamp(28px, 4vw, 32px)", // Increased from 18px
+						top: "clamp(30px, 5vh, 40px)",
+						marginX: "clamp(20px, 4vw, 30px)",
+						textShadow: `-1px -1px 0 #F0EAD6, 1px -1px 0 #F0EAD6, -1px 1px 0 #F0EAD6, 1px 1px 0 #F0EAD6`,
+					},
+					description: {
+						fontSize: "clamp(16px, 2vw, 18px)", // Increased from 12px
+						padding: "clamp(16px, 2.5vw, 20px)",
+						marginX: "clamp(20px, 4vw, 30px)",
+						top: "clamp(120px, 20vh, 140px)",
+						gap: "clamp(20px, 3vh, 28px)",
+					},
+					button: {
+						fontSize: "clamp(16px, 2vw, 18px)", // Increased from 12px
+						height: "clamp(44px, 10vh, 48px)", // Increased height
+						padding: "clamp(20px, 3vw, 24px)",
+						iconSize: "clamp(20px, 2.5vw, 24px)", // Increased icon size
+						width: "auto",
+					},
+				};
+			} else if (width <= 320) {
 				// 📱 Mobile Extra Small (<=320px)
 				newStyles = {
 					header: {
@@ -51,11 +72,7 @@ const MainPage = ({ onCheckLocation }) => {
 							-0.5px -0.5px 0 #F0EAD6,
 							0.5px -0.5px 0 #F0EAD6,
 							-0.5px 0.5px 0 #F0EAD6,
-							0.5px 0.5px 0 #F0EAD6,
-							-1px -1px 0 #F0EAD6,
-							1px -1px 0 #F0EAD6,
-							-1px 1px 0 #F0EAD6,
-							1px 1px 0 #F0EAD6`,
+							0.5px 0.5px 0 #F0EAD6`,
 					},
 					description: {
 						fontSize: "14px",
@@ -83,11 +100,7 @@ const MainPage = ({ onCheckLocation }) => {
 							-0.5px -0.5px 0 #F0EAD6,
 							0.5px -0.5px 0 #F0EAD6,
 							-0.5px 0.5px 0 #F0EAD6,
-							0.5px 0.5px 0 #F0EAD6,
-							-1px -1px 0 #F0EAD6,
-							1px -1px 0 #F0EAD6,
-							-1px 1px 0 #F0EAD6,
-							1px 1px 0 #F0EAD6`,
+							0.5px 0.5px 0 #F0EAD6`,
 					},
 					description: {
 						fontSize: "14px",
@@ -115,11 +128,7 @@ const MainPage = ({ onCheckLocation }) => {
 							-0.75px -0.75px 0 #F0EAD6,
 							0.75px -0.75px 0 #F0EAD6,
 							-0.75px 0.75px 0 #F0EAD6,
-							0.75px 0.75px 0 #F0EAD6,
-							-1.5px -1.5px 0 #F0EAD6,
-							1.5px -1.5px 0 #F0EAD6,
-							-1.5px 1.5px 0 #F0EAD6,
-							1.5px 1.5px 0 #F0EAD6`,
+							0.75px 0.75px 0 #F0EAD6`,
 					},
 					description: {
 						fontSize: "14px",
