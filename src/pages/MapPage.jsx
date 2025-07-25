@@ -46,6 +46,9 @@ const MapPage = () => {
 	const [selectedFacility, setSelectedFacility] = useState(null);
 	const [activeFilter, setActiveFilter] = useState("all");
 	const [isMobile, setIsMobile] = useState(window.innerWidth <= 810);
+	const [isLandscape, setIsLandscape] = useState(
+		window.innerWidth > window.innerHeight
+	);
 	const mapRef = useRef(null);
 
 	const [maximizeConfig, setMaximizeConfig] = useState({
@@ -66,6 +69,7 @@ const MapPage = () => {
 		height: "h-[60px]",
 		width: "w-[300px]",
 		gap: "gap-3",
+		containerStyle: "flex-col gap-3",
 	});
 
 	// Tambahkan state untuk header style
@@ -212,9 +216,23 @@ const MapPage = () => {
 	useEffect(() => {
 		const handleButtonResize = () => {
 			const width = window.innerWidth;
+			const height = window.innerHeight;
+			const isLandscape = width > height;
 
-			if (width <= 375) {
-				// 📱 Mobile Small
+			if (isLandscape && width <= 926) {
+				// Landscape mobile styling
+				setButtonConfig({
+					fontSize: "clamp(14px, 1.8vw, 16px)",
+					padding: "py-2 px-3",
+					iconSize: "w-5 h-5",
+					height: "h-[40px]",
+					width: "w-[220px]",
+					gap: "gap-2",
+					containerStyle:
+						"flex-row justify-center items-center gap-4 bottom-[calc(env(safe-area-inset-bottom,0px)+60px)]",
+				});
+			} else if (width <= 375) {
+				// Keep existing mobile styles
 				setButtonConfig({
 					fontSize: "text-[16px]",
 					padding: "py-2 px-3",
@@ -222,9 +240,10 @@ const MapPage = () => {
 					height: "h-[45px]",
 					width: "70vw",
 					gap: "gap-1.5",
+					containerStyle: "flex-col gap-3",
 				});
 			} else if (width <= 414) {
-				// 📱 Mobile Medium
+				// Keep existing mobile styles
 				setButtonConfig({
 					fontSize: "text-[18px]",
 					padding: "py-2 px-3",
@@ -232,29 +251,10 @@ const MapPage = () => {
 					height: "h-[42px]",
 					width: "70vw",
 					gap: "gap-1.5",
+					containerStyle: "flex-col gap-3",
 				});
-			} else if (width <= 440) {
-				// 📱 Mobile Large
-				setButtonConfig({
-					fontSize: "text-[16px]",
-					padding: "py-2 px-3",
-					iconSize: "w-6 h-6",
-					height: "h-[44px]",
-					width: "60vw",
-					gap: "gap-1.5",
-				});
-			} else if (width <= 884) {
-				// 📊 Tablets
-				setButtonConfig({
-					fontSize: "text-[24px]",
-					padding: "py-3 px-4",
-					iconSize: "w-10 h-10",
-					height: "h-[50px]",
-					width: "55vw",
-					gap: "gap-2",
-				});
-			} else if (width >= 1280) {
-				// 💻 Laptops
+			} else {
+				// Keep existing desktop styles
 				setButtonConfig({
 					fontSize: "text-base",
 					padding: "py-4 px-6",
@@ -262,16 +262,7 @@ const MapPage = () => {
 					height: "h-[60px]",
 					width: "320px",
 					gap: "gap-3",
-				});
-			} else {
-				// Default untuk ukuran diantara tablet dan laptop (885px-1279px)
-				setButtonConfig({
-					fontSize: "text-[14px]",
-					padding: "py-3 px-5",
-					iconSize: "w-5 h-5",
-					height: "h-[52px]",
-					width: "300px",
-					gap: "gap-2.5",
+					containerStyle: "flex-col gap-3",
 				});
 			}
 		};
@@ -279,6 +270,16 @@ const MapPage = () => {
 		handleButtonResize();
 		window.addEventListener("resize", handleButtonResize);
 		return () => window.removeEventListener("resize", handleButtonResize);
+	}, []);
+
+	// Update isLandscape state
+	useEffect(() => {
+		const handleOrientationChange = () => {
+			setIsLandscape(window.innerWidth > window.innerHeight);
+		};
+
+		window.addEventListener("resize", handleOrientationChange);
+		return () => window.removeEventListener("resize", handleOrientationChange);
 	}, []);
 
 	const filteredFacilities = useMemo(() => {
@@ -422,23 +423,28 @@ const MapPage = () => {
 
 				<div
 					className={clsx(
-						"absolute bottom-[calc(env(safe-area-inset-bottom,0px)+80px)] sm:bottom-6 lg:bottom-8 left-1/2 -translate-x-1/2 z-20 flex flex-col gap-3 sm:gap-4 transition-opacity duration-300",
+						"absolute left-1/2 -translate-x-1/2 z-20 flex transition-opacity duration-300",
+						buttonConfig.containerStyle,
 						{ "opacity-0 pointer-events-none": showResults }
 					)}
 					style={{
-						width: buttonConfig.width,
+						bottom:
+							isLandscape && window.innerWidth <= 926
+								? "calc(env(safe-area-inset-bottom, 0px) + 60px)"
+								: "clamp(40px, 10vh, 80px)",
 					}}
 				>
 					<button
 						onClick={handleUseMyLocation}
 						className={clsx(
-							"w-full bg-brand-light-blue text-brand-dark-blue font-semibold rounded-xl shadow-lg hover:bg-white transition-all duration-200 flex items-center justify-center font-poppins",
+							"bg-brand-light-blue text-brand-dark-blue font-semibold rounded-xl shadow-lg hover:bg-white transition-all duration-200 flex items-center justify-center font-poppins whitespace-nowrap",
 							buttonConfig.padding,
 							buttonConfig.fontSize,
 							buttonConfig.gap
 						)}
 						style={{
 							height: buttonConfig.height,
+							width: buttonConfig.width,
 						}}
 					>
 						<svg
@@ -465,13 +471,14 @@ const MapPage = () => {
 					<button
 						onClick={handleCheckFacilities}
 						className={clsx(
-							"w-full bg-brand-accent text-brand-dark-blue font-semibold rounded-xl shadow-lg hover:bg-white transition-all duration-200 flex items-center justify-center font-poppins",
+							"bg-brand-accent text-brand-dark-blue font-semibold rounded-xl shadow-lg hover:bg-white transition-all duration-200 flex items-center justify-center font-poppins whitespace-nowrap",
 							buttonConfig.padding,
 							buttonConfig.fontSize,
 							buttonConfig.gap
 						)}
 						style={{
 							height: buttonConfig.height,
+							width: buttonConfig.width,
 						}}
 					>
 						<svg
