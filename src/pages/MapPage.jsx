@@ -77,17 +77,7 @@ const MapPage = () => {
 		fontSize: "clamp(14px, 2vw, 24px)",
 		wordBreak: "break-word",
 	});
-
-	// Detect mobile screen
-	useEffect(() => {
-		const handleResize = () => {
-			setIsMobile(window.innerWidth <= 810);
-		};
-
-		window.addEventListener("resize", handleResize);
-		return () => window.removeEventListener("resize", handleResize);
-	}, []);
-
+	
 	useEffect(() => {
 		const handleMaximizeResize = () => {
 			const width = window.innerWidth;
@@ -217,69 +207,68 @@ const MapPage = () => {
 		const handleButtonResize = () => {
 			const width = window.innerWidth;
 			const height = window.innerHeight;
-			const isLandscape = width > height;
+			const currentIsLandscape = width > height;
 
-			if (isLandscape && width <= 926) {
+			let newConfig;
+
+			// UPDATE STATE LANDSCAPE DAN MOBILE
+			setIsLandscape(currentIsLandscape);
+			setIsMobile(width <= 810);
+
+			if (currentIsLandscape && width <= 1024) {
 				// Landscape mobile styling
-				setButtonConfig({
+				newConfig = {
 					fontSize: "clamp(14px, 1.8vw, 16px)",
 					padding: "py-2 px-3",
 					iconSize: "w-5 h-5",
-					height: "h-[40px]",
-					width: "w-[220px]",
+					height: "40px",
+					width: "220px",
 					gap: "gap-2",
-					containerStyle:
-						"flex-row justify-center items-center gap-4 bottom-[calc(env(safe-area-inset-bottom,0px)+60px)]",
-				});
+					containerStyle: "flex-row justify-center items-center gap-4",
+				};
+				setButtonConfig(newConfig);
 			} else if (width <= 375) {
 				// Keep existing mobile styles
-				setButtonConfig({
+				newConfig = {
 					fontSize: "text-[16px]",
 					padding: "py-2 px-3",
 					iconSize: "w-6 h-6",
-					height: "h-[45px]",
+					height: "45px",
 					width: "70vw",
 					gap: "gap-1.5",
 					containerStyle: "flex-col gap-3",
-				});
+				};
+				setButtonConfig(newConfig);
 			} else if (width <= 414) {
 				// Keep existing mobile styles
-				setButtonConfig({
+				newConfig = {
 					fontSize: "text-[18px]",
 					padding: "py-2 px-3",
 					iconSize: "w-7 h-7",
-					height: "h-[42px]",
+					height: "42px",
 					width: "70vw",
 					gap: "gap-1.5",
 					containerStyle: "flex-col gap-3",
-				});
+				};
+				setButtonConfig(newConfig);
 			} else {
 				// Keep existing desktop styles
-				setButtonConfig({
+				newConfig = {
 					fontSize: "text-base",
 					padding: "py-4 px-6",
 					iconSize: "w-6 h-6",
-					height: "h-[60px]",
+					height: "60px",
 					width: "320px",
 					gap: "gap-3",
 					containerStyle: "flex-col gap-3",
-				});
+				};
+				setButtonConfig(newConfig);
 			}
 		};
 
 		handleButtonResize();
 		window.addEventListener("resize", handleButtonResize);
 		return () => window.removeEventListener("resize", handleButtonResize);
-	}, []);
-
-	// Update isLandscape state
-	useEffect(() => {
-		const handleOrientationChange = () => {
-			setIsLandscape(window.innerWidth > window.innerHeight);
-		};
-
-		window.addEventListener("resize", handleOrientationChange);
-		return () => window.removeEventListener("resize", handleOrientationChange);
 	}, []);
 
 	const filteredFacilities = useMemo(() => {
@@ -429,7 +418,7 @@ const MapPage = () => {
 					)}
 					style={{
 						bottom:
-							isLandscape && window.innerWidth <= 926
+							isLandscape && window.innerWidth <= 1024
 								? "calc(env(safe-area-inset-bottom, 0px) + 60px)"
 								: "clamp(40px, 10vh, 80px)",
 					}}
