@@ -60,7 +60,6 @@ const FacilityDetailCard = ({ facility, onClose }) => {
 	const [isMobile, setIsMobile] = useState(window.innerWidth <= 810);
 	const [isLandscapeMobile, setIsLandscapeMobile] = useState(false);
 	const sheetRef = useRef(null);
-	const [showDebug, setShowDebug] = useState(true);
 
 	useEffect(() => {
 		setIsOpen(!!facility);
@@ -437,7 +436,7 @@ const FacilityDetailCard = ({ facility, onClose }) => {
                     </div>
                 </div>
 
-                {/* 🔵 FIXED BUTTON SECTION - ALWAYS VISIBLE */}
+                {/* FIXED BUTTON SECTION - ALWAYS VISIBLE */}
                 <div className="border-t border-gray-200 bg-white px-4 py-2">
                     <div className="flex gap-2">
                         <button
@@ -684,25 +683,6 @@ const FacilityDetailCard = ({ facility, onClose }) => {
 
 	return (
 		<>
-			{/* DEBUG PANEL - Hapus untuk production */}
-			{showDebug && (
-				<div className="fixed top-4 left-4 bg-red-600 text-white p-3 rounded-lg text-xs z-[9999] max-w-xs">
-					<div className="font-bold mb-2">🐛 FACILITY DETAIL DEBUG</div>
-					<div>Mode: {!isMobile ? 'Desktop' : isLandscapeMobile ? 'Mobile Landscape' : 'Mobile Portrait'}</div>
-					<div>Screen: {window.innerWidth}x{window.innerHeight}</div>
-					<div>isMobile: {isMobile ? 'TRUE' : 'FALSE'}</div>
-					<div>isLandscapeMobile: {isLandscapeMobile ? 'TRUE' : 'FALSE'}</div>
-					<div>isOpen: {isOpen ? 'TRUE' : 'FALSE'}</div>
-					<div>Facility: {facility ? facility.name : 'NULL'}</div>
-					<div>Breakpoints: 810px (mobile), 926px (landscape)</div>
-					<button 
-						onClick={() => setShowDebug(false)}
-						className="mt-2 bg-white text-red-600 px-2 py-1 rounded text-xs"
-					>
-						Hide Debug
-					</button>
-				</div>
-			)}
 			{/* Overlay */}
 			{!isMobile && (
 				<div
