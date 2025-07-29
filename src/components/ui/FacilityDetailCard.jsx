@@ -70,8 +70,9 @@ const FacilityDetailCard = ({ facility, onClose }) => {
 			const width = window.innerWidth;
             const height = window.innerHeight;
 			const currentIsLandscape = width > height;
-			setIsMobile(width <= 1024);
-			setIsLandscapeMobile(currentIsLandscape && width <= 926);
+			const isTablet = width >= 768 && width <= 1280;
+			setIsMobile(width <= 767);
+			setIsLandscapeMobile(currentIsLandscape && isTablet);
 		};
 		handleResize();
 		window.addEventListener("resize", handleResize);
@@ -692,12 +693,12 @@ const FacilityDetailCard = ({ facility, onClose }) => {
 			)}
 
 			{/* Render content based on screen size */}
-			{!isMobile 
-                ? renderDesktopContent() 
-                : isLandscapeMobile 
-                    ? renderMobileLandscapeContent() 
-                    : renderMobileContent() 
-            }
+			{isMobile
+				? renderMobileContent()
+				: isLandscapeMobile
+					? renderDesktopContent()
+					: renderDesktopContent()
+			}
 		</>
 	);
 };
