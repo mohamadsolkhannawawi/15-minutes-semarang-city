@@ -1,5 +1,5 @@
 /* Mobile CSS untuk MapPage */
-@media (max-width: 810px) {
+@media (max-width: 767px) {
 	.mappage-header {
 		flex-direction: column !important;
 		height: auto !important;
