@@ -180,7 +180,7 @@ const SidePanel = ({
 					top: responsiveConfig.topPosition || "clamp(65px, 9vh, 110px)",
 					width: isMinimized ? responsiveConfig.minimizedButtonSize : "33.33vw",
 					backgroundColor: isMinimized ? "#2A3A4E" : "#9DB2C8",
-					borderRadius: isMinimized ? "50%" : "16px 0 0 16px",
+					borderRadius: isMinimized ? "50%" : "32px 0 0 32px",
 					marginTop: isMinimized
 						? "20px"
 						: responsiveConfig.marginTop || "clamp(8px, 1vh, 16px)",
@@ -202,34 +202,35 @@ const SidePanel = ({
 			>
 				{/* Konten saat tidak diminimize */}
 				{!isMinimized && (
-					<div className="flex flex-col h-full relative">
-						{/* Tombol minimize di pojok kanan atas - RESPONSIF */}
-						<div className="absolute top-6 right-4 z-10">
-							<button
-								onClick={toggleMinimize}
-								className={`${responsiveConfig.minimizePadding} hover:bg-white/30 rounded-full transition-colors`}
-								title="Minimize"
-							>
-								<img
-									src={MinimizeIcon}
-									alt="Minimize"
-									className={responsiveConfig.minimizeIconSize}
-								/>
-							</button>
-						</div>
+				<div className="flex flex-col h-full relative">
+					{/* Header baru: hanya tombol minimize di kanan atas */}
+					<div className="relative bg-[#213448] rounded-tl-2xl px-4 py-3 flex items-center justify-center">
+						<span className={`text-white font-bold text-center ${responsiveConfig.headerFontSize}`}>Informasi Area</span>
+						<button
+							onClick={toggleMinimize}
+							className="p-2 rounded-full hover:bg-white/20 transition-colors absolute right-4"
+							title="Minimize"
+						>
+							<img
+							src={MinimizeIcon}
+							alt="Minimize"
+							style={{ width: 20, height: 20, filter: "brightness(0) invert(1)" }}
+							/>
+						</button>
+					</div>
 
-						{/* Header dengan background brand-accent */}
-						<div className="flex-shrink-0 mx-14 px-4 pt-4 pb-1">
-							<div className="flex justify-center">
-								<div className="p-3 rounded-lg mb-3 bg-brand-accent inline-block">
-									<h2
-										className={`font-bold text-brand-dark-blue text-center whitespace-nowrap ${responsiveConfig.headerFontSize}`}
-									>
-										{facilities.length} Fasilitas Publik Ditemukan
-									</h2>
-								</div>
+					{/* Judul di bawah header, di luar container biru */}
+					<div className="flex-shrink-0 mx-14 px-4 pt-4 pb-1">
+						<div className="flex justify-center">
+							<div className="p-3 rounded-lg mb-3 bg-brand-accent inline-block">
+								<h2
+									className={`font-bold text-brand-dark-blue text-center whitespace-nowrap ${responsiveConfig.headerFontSize}`}
+								>
+									{facilities.length} Fasilitas Publik Ditemukan
+								</h2>
 							</div>
 						</div>
+					</div>
 
 						{/* List fasilitas dengan background brand-accent */}
 						<div
