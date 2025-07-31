@@ -1,4 +1,6 @@
 import React, { useState, useMemo, useRef, useEffect } from "react";
+import axios from "axios";
+import api from "../api";
 import { MapContainer, TileLayer, Marker, Polygon } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -14,11 +16,6 @@ import SidePanel from "../components/ui/SidePanel";
 import FacilityDetailCard from "../components/ui/FacilityDetailCard";
 import FacilityMarker from "../components/map/FacilityMarker";
 import MapEvents from "../components/map/MapEvents";
-import {
-	dummyFacilities,
-	dummyGeographicInfo,
-	dummyIsochrone,
-} from "../data/dummyData";
 
 // Fix ikon default
 import icon from "leaflet/dist/images/marker-icon.png";
@@ -42,10 +39,13 @@ const MapPage = () => {
 	const [mapCenter, setMapCenter] = useState(SIMPANG_LIMA_COORDS);
 	const [userPin, setUserPin] = useState(null);
 	const [showResults, setShowResults] = useState(false);
-	const [facilities] = useState(dummyFacilities);
+	const [facilities, setFacilities] = useState([]);
 	const [selectedFacility, setSelectedFacility] = useState(null);
 	const [activeFilter, setActiveFilter] = useState("all");
 	const [isMobile, setIsMobile] = useState(window.innerWidth <= 810);
+	const [isLoading, setIsLoading] = useState(false);
+	const [error, setError] = useState(null);
+	const [polygonCoords, setPolygonCoords] = useState([]);
 	const [isLandscape, setIsLandscape] = useState(
 		window.innerWidth > window.innerHeight
 	);
@@ -57,6 +57,8 @@ const MapPage = () => {
 		buttonPadding: "p-3",
 		bottomPosition: "bottom-6",
 		rightPosition: "right-6",
+		buttonWidth: "40px",
+		buttonHeight: "40px",
 	});
 
 	// Tambahkan state untuk button styling
@@ -66,8 +68,8 @@ const MapPage = () => {
 		iconSize: "w-6 h-6",
 		buttonWidth: "48px", // ← TAMBAH INI
 		buttonHeight: "48px", // ← TAMBAH INI
-		height: "h-[60px]",
-		width: "w-[300px]",
+		height: "60px", // <-- Perbaikan
+		width: "300px",
 		gap: "gap-3",
 		containerStyle: "flex-col gap-3",
 	});
@@ -76,8 +78,9 @@ const MapPage = () => {
 	const [headerStyle, setHeaderStyle] = useState({
 		fontSize: "clamp(14px, 2vw, 24px)",
 		wordBreak: "break-word",
+		whiteSpace: "normal",
 	});
-	
+
 	useEffect(() => {
 		const handleMaximizeResize = () => {
 			const width = window.innerWidth;
@@ -278,6 +281,16 @@ const MapPage = () => {
 		return facilities.filter((facility) => facility.type === activeFilter);
 	}, [activeFilter, facilities]);
 
+	const formatFacilities = (data) => {
+		return data.map((facility) => ({
+			id: facility.id,
+			name: facility.name,
+			type: "kesehatan", // Ganti nanti jika API memberikan kategori
+			position: [facility.lat, facility.lng],
+			address: facility.description,
+		}));
+	};
+
 	const handleMapClick = (latlng) => {
 		if (showResults) return;
 		setUserPin(latlng);
@@ -285,39 +298,157 @@ const MapPage = () => {
 	};
 
 	const handleUseMyLocation = () => {
-		// Di non aktifkan untuk nanti saat data sudah siap
-		// navigator.geolocation.getCurrentPosition((position) => {
-		// 	const myLocation = {
-		// 		lat: position.coords.latitude,
-		// 		lng: position.coords.longitude,
-		// 	};
-		// 	setMapCenter([myLocation.lat, myLocation.lng]);
-		// 	setUserPin(myLocation);
-		// 	setSelectedFacility(null);
-		// });
-		const defaultLocation = {
-			lat: SIMPANG_LIMA_COORDS[0],
-			lng: SIMPANG_LIMA_COORDS[1],
-		};
+		navigator.geolocation.getCurrentPosition(
+			(position) => {
+				const myLocation = {
+					lat: position.coords.latitude,
+					lng: position.coords.longitude,
+				};
+				setMapCenter([myLocation.lat, myLocation.lng]);
+				setUserPin(myLocation);
+				setSelectedFacility(null);
 
-		setMapCenter(SIMPANG_LIMA_COORDS);
-		setUserPin(defaultLocation);
-		setSelectedFacility(null);
+				if (mapRef.current) {
+					setTimeout(() => {
+						mapRef.current.flyTo([myLocation.lat, myLocation.lng], 16);
+					}, 100);
+				}
+			},
+			(error) => {
+				console.error("Error getting location:", error);
+				// Fallback ke Simpang Lima jika gagal mendapatkan lokasi
+				const defaultLocation = {
+					lat: SIMPANG_LIMA_COORDS[0],
+					lng: SIMPANG_LIMA_COORDS[1],
+				};
+				setMapCenter(SIMPANG_LIMA_COORDS);
+				setUserPin(defaultLocation);
+				setSelectedFacility(null);
 
-		if (mapRef.current) {
-			setTimeout(() => {
-				mapRef.current.flyTo(SIMPANG_LIMA_COORDS, 16);
-			}, 100);
-		}
+				if (mapRef.current) {
+					setTimeout(() => {
+						mapRef.current.flyTo(SIMPANG_LIMA_COORDS, 16);
+					}, 100);
+				}
+			}
+		);
 	};
 
-	const handleCheckFacilities = () => {
+	const handleCheckFacilities = async () => {
 		if (!userPin) {
 			alert("Silakan tandai lokasi di peta atau gunakan lokasi Anda.");
 			return;
 		}
-		setShowResults(true);
-		setSelectedFacility(null);
+
+		console.log("🚀 Mulai proses pencarian fasilitas...");
+		setIsLoading(true);
+		setError(null);
+		setPolygonCoords([]);
+
+		try {
+			const { lat, lng } = userPin;
+			console.log(`📍 Lokasi dipilih: ${lat}, ${lng}`);
+
+			console.log("🔍 Mencoba koneksi ke backend...");
+			const checkResult = await api.post("/walkability-zones/check", {
+				lat,
+				lng,
+			});
+			console.log("🔍 Respons dari DB:", checkResult.data);
+
+			if (checkResult.data.exists && checkResult.data.zone_polygon) {
+				const polygon = checkResult.data.zone_polygon.coordinates[0].map(
+					([lng, lat]) => [lat, lng]
+				);
+				setPolygonCoords(polygon);
+				console.log("✅ Polygon dari DB ditampilkan");
+
+				const servicesResponse = await api.get(
+					`/services/in-zone/${checkResult.data.search_id}`
+				);
+				setFacilities(formatFacilities(servicesResponse.data));
+			} else {
+				console.log("🔄 Tidak ada data di DB, mengambil dari ORS...");
+				console.log("ORS API KEY:", import.meta.env.VITE_ORS_API_KEY);
+				console.log(
+					"ORS API KEY length:",
+					import.meta.env.VITE_ORS_API_KEY?.length
+				);
+
+				if (!import.meta.env.VITE_ORS_API_KEY) {
+					throw new Error(
+						"ORS API Key tidak ditemukan di environment variable"
+					);
+				}
+
+				const orsResponse = await axios.post(
+					"https://api.openrouteservice.org/v2/isochrones/foot-walking",
+					{ locations: [[lng, lat]], range: [900], attributes: ['area']},
+					{
+						headers: {
+							"Authorization" : import.meta.env.VITE_ORS_API_KEY,
+							"Content-Type" : "application/json",
+						},
+					} // Ganti dengan VITE env Anda nanti
+				);
+
+				const newCoords =
+					orsResponse.data.features[0].geometry.coordinates[0].map(
+						([lng, lat]) => [lat, lng]
+					);
+				setPolygonCoords(newCoords);
+
+				const searchResponse = await api.post("/user-searches", { lat, lng });
+				const searchId = searchResponse.data.id;
+
+				if (searchId) {
+					const geojson = {
+						type: "Polygon",
+						coordinates: [newCoords.map(([lat, lng]) => [lng, lat])],
+					};
+					await api.post("/walkability-zones", {
+						search_id: searchId,
+						polygon: geojson,
+						zone_type: "walking",
+						travel_time: 15,
+					});
+					console.log("🆕 Titik dan polygon baru disimpan");
+
+					const servicesResponse = await api.get(
+						`/services/in-zone/${searchId}`
+					);
+					setFacilities(formatFacilities(servicesResponse.data));
+				}
+			}
+			setShowResults(true);
+		} catch (err) {
+			console.error("❌ Error detail:", {
+				message: err.message,
+				response: err.response?.data,
+				status: err.response?.status,
+				statusText: err.response?.statusText,
+			});
+
+			if (err.response?.status === 404) {
+				setError(
+					"Backend Laravel tidak berjalan. Pastikan server backend aktif di http://127.0.0.1:8000"
+				);
+			} else if (err.response?.status === 401 || err.response?.status === 403) {
+				setError(
+					"API Key ORS tidak valid atau tidak terbaca dari environment variable"
+				);
+			} else {
+				setError(
+					`Gagal memproses data: ${err.response?.data?.error || err.message}`
+				);
+			}
+			console.error(
+				"Error in handleCheckFacilities:",
+				err.response?.data || err.message
+			);
+		} finally {
+			setIsLoading(false);
+		}
 	};
 
 	const handleFacilitySelect = (facility) => {
@@ -329,6 +460,8 @@ const MapPage = () => {
 		setShowResults(false);
 		setSelectedFacility(null);
 		setActiveFilter("all");
+		setFacilities([]); // Kosongkan fasilitas saat reset
+		setPolygonCoords([]); // Kosongkan poligon saat reset
 	};
 
 	return (
@@ -377,6 +510,16 @@ const MapPage = () => {
 			</header>
 
 			<main className="relative flex-grow">
+				{isLoading && (
+					<div className="absolute inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+						<p className="text-white text-xl font-bold">Mencari Fasilitas...</p>
+					</div>
+				)}
+				{error && (
+					<div className="absolute top-20 left-1/2 -translate-x-1/2 bg-red-500 text-white p-4 rounded-lg z-50 shadow-lg">
+						<p>{error}</p>
+					</div>
+				)}
 				<MapContainer
 					center={mapCenter}
 					zoom={15}
@@ -397,7 +540,7 @@ const MapPage = () => {
 									fillColor: "orange",
 									fillOpacity: 0.2,
 								}}
-								positions={dummyIsochrone}
+								positions={polygonCoords}
 							/>
 							{filteredFacilities.map((facility) => (
 								<FacilityMarker
@@ -529,7 +672,7 @@ const MapPage = () => {
 				<SidePanel
 					isVisible={showResults && !selectedFacility}
 					facilities={filteredFacilities}
-					geoInfo={dummyGeographicInfo}
+					geoInfo={{}}
 					onFacilitySelect={handleFacilitySelect}
 					onClose={resetView}
 				/>
