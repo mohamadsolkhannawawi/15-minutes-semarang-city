@@ -1,0 +1,26 @@
+[
+    {
+      "name": "RS St. Elisabeth Semarang",
+      "category": "Kesehatan",
+      "description": "Rumah Sakit di Jl. Kawi No.1",
+      "address": "Jl. Kawi No.1, Tegalsari",
+      "lat": -6.991,
+      "lng": 110.423
+    },
+    {
+      "name": "Puskesmas Karangkidul",
+      "category": "Kesehatan",
+      "description": "Puskesmas di Jl. Karangkidul No.15",
+      "address": "Jl. Karangkidul No.15",
+      "lat": -6.994,
+      "lng": 110.428
+    },
+    {
+      "name": "Apotek Simpang Lima",
+      "category": "Kesehatan",
+      "description": "Apotek 24 Jam",
+      "address": "Jl. Pahlawan No. 1",
+      "lat": -6.992,
+      "lng": 110.424
+    }
+]
