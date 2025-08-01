@@ -20,33 +20,23 @@ import ViharaIcon from "../../assets/icons/Vihara.svg";
 // Mapping icon berdasarkan tipe fasilitas
 const getIconForType = (type) => {
 	const iconMap = {
-		bandara: BandaraIcon,
-		gereja: GerejaIcon,
-		kesehatan: KesehatanIcon,
-		klenteng: KlentengIcon,
-		masjid: MasjidIcon,
-		pemerintah: PemerintahIcon,
-		pendidikan: PendidikanIcon,
-		perpustakaan: PerpustakaanIcon,
-		pura: PuraIcon,
-		restoran: RestoranIcon,
-		stasiun: StasiunIcon,
-		taman: TamanIcon,
-		terminal: TerminalIcon,
-		toko: TokoIcon,
-		vihara: ViharaIcon,
-		// Aliases
-		hospital: KesehatanIcon,
-		church: GerejaIcon,
-		mosque: MasjidIcon,
-		temple: KlentengIcon,
-		school: PendidikanIcon,
-		restaurant: RestoranIcon,
-		shop: TokoIcon,
-		park: TamanIcon,
-		library: PerpustakaanIcon,
-		government: PemerintahIcon,
-		station: StasiunIcon,
+		Kesehatan: KesehatanIcon,
+		Pendidikan: PendidikanIcon,
+		Ibadah: MasjidIcon, // Jika ingin lebih detail, bisa mapping ke Masjid/Gereja/Klenteng/Pura/Vihara sesuai kebutuhan
+		Bandara: BandaraIcon,
+		Gereja: GerejaIcon,
+		Klenteng: KlentengIcon,
+		Masjid: MasjidIcon,
+		Pemerintah: PemerintahIcon,
+		Perpustakaan: PerpustakaanIcon,
+		Pura: PuraIcon,
+		Restoran: RestoranIcon,
+		Stasiun: StasiunIcon,
+		Taman: TamanIcon,
+		Terminal: TerminalIcon,
+		Toko: TokoIcon,
+		Vihara: ViharaIcon,
+		// Tambahkan kategori lain jika ada
 	};
 
 	return iconMap[type] || KesehatanIcon;
