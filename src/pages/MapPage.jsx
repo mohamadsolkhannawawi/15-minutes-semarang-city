@@ -282,13 +282,16 @@ const MapPage = () => {
 	}, [activeFilter, facilities]);
 
 	const formatFacilities = (data) => {
-		return data.map((facility) => ({
+		console.log('Raw data from backend:', data); // Debug log
+		const formatted = data.map((facility) => ({
 			id: facility.id,
 			name: facility.name,
-			type: "kesehatan", // Ganti nanti jika API memberikan kategori
+			type: facility.category_name, // Ambil dari backend
 			position: [facility.lat, facility.lng],
 			address: facility.description,
 		}));
+		console.log('Formatted facilities:', formatted); // Debug log
+		return formatted;
 	};
 
 	const handleMapClick = (latlng) => {

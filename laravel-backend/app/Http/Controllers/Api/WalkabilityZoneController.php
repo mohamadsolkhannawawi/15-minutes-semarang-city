@@ -77,7 +77,7 @@ class WalkabilityZoneController extends Controller
         $lng = $request->lng;
 
         // Toleransi 10 meter dalam derajat (sekitar 0.00009 derajat)
-        $tolerance = 10 / 111000; // 10 meter dalam derajat
+        $tolerance = 500 / 111000; // 10 meter dalam derajat
 
         $result = DB::table('walkability_zones')
             ->join('user_searches as us', 'walkability_zones.search_id', '=', 'us.id')
