@@ -33,9 +33,51 @@ const userPinIcon = L.icon({
 	iconAnchor: [30, 60],
 });
 
+// Lokasi Default Simpang Lima
+const SIMPANG_LIMA_COORDS = [-6.991, 110.423];
+
+// Batas koordinat kota Semarang (approximate bounding box)
+const SEMARANG_BOUNDS = {
+	north: -6.85, // Batas utara
+	south: -7.15, // Batas selatan
+	east: 110.55, // Batas timur
+	west: 110.25, // Batas barat
+};
+
+// Fungsi untuk mengecek apakah koordinat berada dalam batas kota Semarang
+const isWithinSemarang = (lat, lng) => {
+	return (
+		lat >= SEMARANG_BOUNDS.south &&
+		lat <= SEMARANG_BOUNDS.north &&
+		lng >= SEMARANG_BOUNDS.west &&
+		lng <= SEMARANG_BOUNDS.east
+	);
+};
+
+// Fungsi untuk mendapatkan nama kota dari koordinat menggunakan reverse geocoding
+const getCityFromCoordinates = async (lat, lng) => {
+	try {
+		const response = await fetch(
+			`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=10&addressdetails=1`
+		);
+		const data = await response.json();
+
+		// Cek berbagai level untuk nama kota
+		const city =
+			data.address?.city ||
+			data.address?.town ||
+			data.address?.municipality ||
+			data.address?.county ||
+			data.address?.state;
+
+		return city || data.display_name;
+	} catch (error) {
+		console.error("Error getting city name:", error);
+		return null;
+	}
+};
+
 const MapPage = () => {
-	// Lokasi Default Simpang Lima
-	const SIMPANG_LIMA_COORDS = [-6.9904397128823295, 110.42294902766812];
 	const [mapCenter, setMapCenter] = useState(SIMPANG_LIMA_COORDS);
 	const [userPin, setUserPin] = useState(null);
 	const [showResults, setShowResults] = useState(false);
@@ -44,7 +86,9 @@ const MapPage = () => {
 	const [activeFilter, setActiveFilter] = useState("all");
 	const [isMobile, setIsMobile] = useState(window.innerWidth <= 810);
 	const [isLoading, setIsLoading] = useState(false);
+	const [isLoadingLocation, setIsLoadingLocation] = useState(false);
 	const [error, setError] = useState(null);
+	const [locationMessage, setLocationMessage] = useState(null);
 	const [polygonCoords, setPolygonCoords] = useState([]);
 	const [isLandscape, setIsLandscape] = useState(
 		window.innerWidth > window.innerHeight
@@ -274,6 +318,17 @@ const MapPage = () => {
 		return () => window.removeEventListener("resize", handleButtonResize);
 	}, []);
 
+	// Auto-hide location message after 5 seconds
+	useEffect(() => {
+		if (locationMessage) {
+			const timer = setTimeout(() => {
+				setLocationMessage(null);
+			}, 5000);
+
+			return () => clearTimeout(timer);
+		}
+	}, [locationMessage]);
+
 	const filteredFacilities = useMemo(() => {
 		if (activeFilter === "all") {
 			return facilities;
@@ -282,7 +337,7 @@ const MapPage = () => {
 	}, [activeFilter, facilities]);
 
 	const formatFacilities = (data) => {
-		console.log('Raw data from backend:', data); // Debug log
+		console.log("Raw data from backend:", data); // Debug log
 		const formatted = data.map((facility) => ({
 			id: facility.id,
 			name: facility.name,
@@ -290,7 +345,7 @@ const MapPage = () => {
 			position: [facility.lat, facility.lng],
 			address: facility.description,
 		}));
-		console.log('Formatted facilities:', formatted); // Debug log
+		console.log("Formatted facilities:", formatted); // Debug log
 		return formatted;
 	};
 
@@ -301,12 +356,60 @@ const MapPage = () => {
 	};
 
 	const handleUseMyLocation = () => {
+		setIsLoadingLocation(true);
+		setError(null);
+
 		navigator.geolocation.getCurrentPosition(
-			(position) => {
+			async (position) => {
 				const myLocation = {
 					lat: position.coords.latitude,
 					lng: position.coords.longitude,
 				};
+
+				console.log("📍 Lokasi user:", myLocation);
+
+				// Cek apakah berada dalam batas Semarang
+				if (!isWithinSemarang(myLocation.lat, myLocation.lng)) {
+					// Coba dapatkan nama kota untuk pesan yang lebih informatif
+					const cityName = await getCityFromCoordinates(
+						myLocation.lat,
+						myLocation.lng
+					);
+
+					const message = cityName
+						? `Lokasi Anda berada di ${cityName}. Aplikasi ini hanya tersedia untuk kota Semarang. Silakan cari fasilitas publik di Semarang.`
+						: "Lokasi Anda berada di luar kota Semarang. Aplikasi ini hanya tersedia untuk kota Semarang. Silakan cari fasilitas publik di Semarang.";
+
+					setLocationMessage({
+						type: "warning",
+						title: "Lokasi Di Luar Semarang",
+						message: message,
+						showMap: true,
+					});
+
+					// Tetap tampilkan lokasi user di peta tapi dengan pesan
+					setMapCenter([myLocation.lat, myLocation.lng]);
+					setUserPin(myLocation);
+					setSelectedFacility(null);
+
+					if (mapRef.current) {
+						setTimeout(() => {
+							mapRef.current.flyTo([myLocation.lat, myLocation.lng], 12);
+						}, 100);
+					}
+					setIsLoadingLocation(false);
+					return;
+				}
+
+				// Jika berada di Semarang, lanjutkan seperti biasa
+				setLocationMessage({
+					type: "success",
+					title: "Lokasi Ditemukan",
+					message:
+						"Lokasi Anda berada di Semarang. Silakan cari fasilitas publik di sekitar Anda.",
+					showMap: false,
+				});
+
 				setMapCenter([myLocation.lat, myLocation.lng]);
 				setUserPin(myLocation);
 				setSelectedFacility(null);
@@ -316,9 +419,39 @@ const MapPage = () => {
 						mapRef.current.flyTo([myLocation.lat, myLocation.lng], 16);
 					}, 100);
 				}
+				setIsLoadingLocation(false);
 			},
 			(error) => {
 				console.error("Error getting location:", error);
+				let errorMessage = "Gagal mendapatkan lokasi Anda.";
+				let errorTitle = "Error Lokasi";
+
+				switch (error.code) {
+					case error.PERMISSION_DENIED:
+						errorTitle = "Akses Lokasi Ditolak";
+						errorMessage =
+							"Akses lokasi ditolak. Silakan izinkan akses lokasi di pengaturan browser Anda.";
+						break;
+					case error.POSITION_UNAVAILABLE:
+						errorTitle = "Lokasi Tidak Tersedia";
+						errorMessage = "Informasi lokasi tidak tersedia.";
+						break;
+					case error.TIMEOUT:
+						errorTitle = "Waktu Habis";
+						errorMessage = "Waktu permintaan lokasi habis.";
+						break;
+					default:
+						errorTitle = "Error Lokasi";
+						errorMessage = "Terjadi kesalahan saat mendapatkan lokasi.";
+				}
+
+				setLocationMessage({
+					type: "error",
+					title: errorTitle,
+					message: errorMessage,
+					showMap: false,
+				});
+
 				// Fallback ke Simpang Lima jika gagal mendapatkan lokasi
 				const defaultLocation = {
 					lat: SIMPANG_LIMA_COORDS[0],
@@ -333,6 +466,12 @@ const MapPage = () => {
 						mapRef.current.flyTo(SIMPANG_LIMA_COORDS, 16);
 					}, 100);
 				}
+				setIsLoadingLocation(false);
+			},
+			{
+				enableHighAccuracy: true,
+				timeout: 10000,
+				maximumAge: 60000,
 			}
 		);
 	};
@@ -514,6 +653,87 @@ const MapPage = () => {
 						<p>{error}</p>
 					</div>
 				)}
+				{locationMessage && (
+					<div
+						className={`absolute top-20 left-1/2 -translate-x-1/2 p-4 rounded-lg z-50 shadow-lg max-w-md ${
+							locationMessage.type === "warning"
+								? "bg-yellow-500 text-white"
+								: locationMessage.type === "error"
+								? "bg-red-500 text-white"
+								: "bg-green-500 text-white"
+						}`}
+					>
+						<div className="flex items-start gap-3">
+							<div className="flex-shrink-0">
+								{locationMessage.type === "warning" ? (
+									<svg
+										className="w-5 h-5"
+										fill="currentColor"
+										viewBox="0 0 20 20"
+									>
+										<path
+											fillRule="evenodd"
+											d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z"
+											clipRule="evenodd"
+										/>
+									</svg>
+								) : locationMessage.type === "error" ? (
+									<svg
+										className="w-5 h-5"
+										fill="currentColor"
+										viewBox="0 0 20 20"
+									>
+										<path
+											fillRule="evenodd"
+											d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+											clipRule="evenodd"
+										/>
+									</svg>
+								) : (
+									<svg
+										className="w-5 h-5"
+										fill="currentColor"
+										viewBox="0 0 20 20"
+									>
+										<path
+											fillRule="evenodd"
+											d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+											clipRule="evenodd"
+										/>
+									</svg>
+								)}
+							</div>
+							<div className="flex-1">
+								<h3 className="font-semibold text-sm">
+									{locationMessage.title}
+								</h3>
+								<p className="text-sm mt-1">{locationMessage.message}</p>
+								{locationMessage.showMap && (
+									<p className="text-xs mt-2 opacity-90">
+										Peta akan menampilkan lokasi Anda. Anda dapat mencari
+										fasilitas di Semarang dengan menandai lokasi di peta.
+									</p>
+								)}
+							</div>
+							<button
+								onClick={() => setLocationMessage(null)}
+								className="flex-shrink-0 text-white hover:text-gray-200"
+							>
+								<svg
+									className="w-4 h-4"
+									fill="currentColor"
+									viewBox="0 0 20 20"
+								>
+									<path
+										fillRule="evenodd"
+										d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+										clipRule="evenodd"
+									/>
+								</svg>
+							</button>
+						</div>
+					</div>
+				)}
 				<MapContainer
 					center={mapCenter}
 					zoom={15}
@@ -564,37 +784,67 @@ const MapPage = () => {
 				>
 					<button
 						onClick={handleUseMyLocation}
+						disabled={isLoadingLocation}
 						className={clsx(
 							"bg-brand-light-blue text-brand-dark-blue font-semibold rounded-xl shadow-lg hover:bg-white transition-all duration-200 flex items-center justify-center font-poppins whitespace-nowrap",
 							buttonConfig.padding,
 							buttonConfig.fontSize,
-							buttonConfig.gap
+							buttonConfig.gap,
+							{ "opacity-50 cursor-not-allowed": isLoadingLocation }
 						)}
 						style={{
 							height: buttonConfig.height,
 							width: buttonConfig.width,
 						}}
 					>
-						<svg
-							xmlns="http://www.w3.org/2000/svg"
-							fill="none"
-							viewBox="0 0 24 24"
-							strokeWidth={1.5}
-							stroke="currentColor"
-							className={buttonConfig.iconSize}
-						>
-							<path
-								strokeLinecap="round"
-								strokeLinejoin="round"
-								d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
-							/>
-							<path
-								strokeLinecap="round"
-								strokeLinejoin="round"
-								d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"
-							/>
-						</svg>
-						Gunakan Lokasi Saya
+						{isLoadingLocation ? (
+							<>
+								<svg
+									className="animate-spin -ml-1 mr-3 h-5 w-5 text-brand-dark-blue"
+									xmlns="http://www.w3.org/2000/svg"
+									fill="none"
+									viewBox="0 0 24 24"
+								>
+									<circle
+										className="opacity-25"
+										cx="12"
+										cy="12"
+										r="10"
+										stroke="currentColor"
+										strokeWidth="4"
+									></circle>
+									<path
+										className="opacity-75"
+										fill="currentColor"
+										d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+									></path>
+								</svg>
+								Mengambil Lokasi...
+							</>
+						) : (
+							<>
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									fill="none"
+									viewBox="0 0 24 24"
+									strokeWidth={1.5}
+									stroke="currentColor"
+									className={buttonConfig.iconSize}
+								>
+									<path
+										strokeLinecap="round"
+										strokeLinejoin="round"
+										d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"
+									/>
+									<path
+										strokeLinecap="round"
+										strokeLinejoin="round"
+										d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"
+									/>
+								</svg>
+								Gunakan Lokasi Saya
+							</>
+						)}
 					</button>
 					<button
 						onClick={handleCheckFacilities}
