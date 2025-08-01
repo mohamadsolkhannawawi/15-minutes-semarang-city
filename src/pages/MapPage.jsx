@@ -787,9 +787,26 @@ const MapPage = () => {
 				status: err.response?.status,
 				config: err.config, // Menampilkan detail request yang gagal
 			});
-			setError(
-				`Gagal memproses data: ${err.response?.data?.message || err.message}`
-			);
+
+			// Error handling yang lebih spesifik
+			let errorMessage = "Gagal memproses data";
+
+			if (
+				err.code === "NETWORK_ERROR" ||
+				err.message.includes("Network Error")
+			) {
+				errorMessage =
+					"Network Error: Pastikan backend Laravel berjalan dan dapat diakses dari network. Coba akses http://192.168.1.5:8000/api di browser.";
+			} else if (err.response?.status === 404) {
+				errorMessage =
+					"API endpoint tidak ditemukan. Pastikan backend Laravel berjalan.";
+			} else if (err.response?.status === 500) {
+				errorMessage = "Server error. Periksa log Laravel backend.";
+			} else {
+				errorMessage = `${err.response?.data?.message || err.message}`;
+			}
+
+			setError(errorMessage);
 		} finally {
 			setIsLoading(false);
 		}
