@@ -77,6 +77,23 @@ const getCityFromCoordinates = async (lat, lng) => {
 	}
 };
 
+// Fungsi untuk mendeteksi browser
+const getBrowserInfo = () => {
+	const userAgent = navigator.userAgent;
+
+	if (userAgent.includes("Chrome") && !userAgent.includes("Edg")) {
+		return "Chrome";
+	} else if (userAgent.includes("Edg")) {
+		return "Edge";
+	} else if (userAgent.includes("Firefox")) {
+		return "Firefox";
+	} else if (userAgent.includes("Safari") && !userAgent.includes("Chrome")) {
+		return "Safari";
+	} else {
+		return "Unknown";
+	}
+};
+
 const MapPage = () => {
 	const [mapCenter, setMapCenter] = useState(SIMPANG_LIMA_COORDS);
 	const [userPin, setUserPin] = useState(null);
@@ -359,121 +376,244 @@ const MapPage = () => {
 		setIsLoadingLocation(true);
 		setError(null);
 
-		navigator.geolocation.getCurrentPosition(
-			async (position) => {
-				const myLocation = {
-					lat: position.coords.latitude,
-					lng: position.coords.longitude,
-				};
+		console.log("🌐 Browser:", getBrowserInfo());
+		console.log("🌐 User Agent:", navigator.userAgent);
+		console.log("🌐 Geolocation supported:", !!navigator.geolocation);
+		console.log("🌐 Permissions API supported:", !!navigator.permissions);
 
-				console.log("📍 Lokasi user:", myLocation);
+		// Cek apakah geolocation tersedia
+		if (!navigator.geolocation) {
+			setLocationMessage({
+				type: "error",
+				title: "Geolokasi Tidak Didukung",
+				message:
+					"Browser Anda tidak mendukung geolokasi. Silakan gunakan browser yang lebih baru atau tandai lokasi secara manual di peta.",
+				showMap: false,
+			});
+			setIsLoadingLocation(false);
+			return;
+		}
 
-				// Cek apakah berada dalam batas Semarang
-				if (!isWithinSemarang(myLocation.lat, myLocation.lng)) {
-					// Coba dapatkan nama kota untuk pesan yang lebih informatif
-					const cityName = await getCityFromCoordinates(
-						myLocation.lat,
-						myLocation.lng
+		// Cek izin lokasi terlebih dahulu
+		if (navigator.permissions) {
+			navigator.permissions
+				.query({ name: "geolocation" })
+				.then((permissionStatus) => {
+					console.log("🔐 Permission status:", permissionStatus.state);
+
+					if (permissionStatus.state === "denied") {
+						console.log("❌ Location permission denied");
+						setLocationMessage({
+							type: "error",
+							title: "Akses Lokasi Ditolak",
+							message:
+								"Akses lokasi ditolak oleh browser. Silakan ikuti langkah berikut untuk mengizinkan akses lokasi:",
+							showMap: false,
+							showInstructions: true,
+						});
+						setIsLoadingLocation(false);
+						console.log("⚠️ User location set but outside Semarang bounds");
+						console.log("⚠️ User location is outside Semarang bounds");
+						console.log(
+							"⚠️ User location process completed but outside bounds"
+						);
+						return;
+					}
+
+					console.log("✅ Permission granted or prompt, proceeding...");
+					// Jika izin granted atau prompt, lanjutkan dengan getCurrentPosition
+					getUserLocation();
+				})
+				.catch((error) => {
+					console.log("⚠️ Permissions API error:", error);
+					// Fallback jika permissions API tidak tersedia
+					getUserLocation();
+				});
+		} else {
+			console.log("⚠️ Permissions API not supported, proceeding directly...");
+			// Fallback untuk browser yang tidak mendukung permissions API
+			getUserLocation();
+		}
+
+		function getUserLocation() {
+			navigator.geolocation.getCurrentPosition(
+				async (position) => {
+					const myLocation = {
+						lat: position.coords.latitude,
+						lng: position.coords.longitude,
+					};
+
+					console.log("📍 Lokasi user:", myLocation);
+					console.log("📍 Akurasi:", position.coords.accuracy, "meter");
+					console.log(
+						"📍 Timestamp:",
+						new Date(position.timestamp).toLocaleString()
+					);
+					console.log("📍 Altitude:", position.coords.altitude);
+					console.log("📍 Heading:", position.coords.heading);
+					console.log("📍 Speed:", position.coords.speed);
+					console.log(
+						"📍 Within Semarang bounds:",
+						isWithinSemarang(myLocation.lat, myLocation.lng)
 					);
 
-					const message = cityName
-						? `Lokasi Anda berada di ${cityName}. Aplikasi ini hanya tersedia untuk kota Semarang. Silakan cari fasilitas publik di Semarang.`
-						: "Lokasi Anda berada di luar kota Semarang. Aplikasi ini hanya tersedia untuk kota Semarang. Silakan cari fasilitas publik di Semarang.";
+					// Cek akurasi lokasi
+					if (position.coords.accuracy > 1000) {
+						console.log(
+							"⚠️ Low accuracy location:",
+							position.coords.accuracy,
+							"meters"
+						);
+						setLocationMessage({
+							type: "warning",
+							title: "Akurasi Lokasi Rendah",
+							message: `Akurasi lokasi Anda adalah ${Math.round(
+								position.coords.accuracy
+							)} meter. Hasil mungkin tidak akurat. Pastikan GPS aktif dan berada di area terbuka.`,
+							showMap: false,
+							showAccuracyInfo: true,
+							accuracy: position.coords.accuracy,
+						});
+					} else {
+						console.log(
+							"✅ Good accuracy location:",
+							position.coords.accuracy,
+							"meters"
+						);
+					}
 
+					// Cek apakah berada dalam batas Semarang
+					if (!isWithinSemarang(myLocation.lat, myLocation.lng)) {
+						console.log("⚠️ Location outside Semarang bounds");
+						// Coba dapatkan nama kota untuk pesan yang lebih informatif
+						const cityName = await getCityFromCoordinates(
+							myLocation.lat,
+							myLocation.lng
+						);
+
+						console.log("🌍 Detected city:", cityName);
+
+						const message = cityName
+							? `Lokasi Anda terdeteksi di ${cityName}. Aplikasi ini hanya tersedia untuk kota Semarang. Silakan cari fasilitas publik di Semarang atau gunakan lokasi manual di peta.`
+							: "Lokasi Anda berada di luar kota Semarang. Aplikasi ini hanya tersedia untuk kota Semarang. Silakan cari fasilitas publik di Semarang dengan menandai lokasi di peta.";
+
+						setLocationMessage({
+							type: "warning",
+							title: "Lokasi Di Luar Semarang",
+							message: message,
+							showMap: true,
+							showCoordinates: true,
+							coordinates: myLocation,
+						});
+
+						// Tetap tampilkan lokasi user di peta tapi dengan pesan
+						setMapCenter([myLocation.lat, myLocation.lng]);
+						setUserPin(myLocation);
+						setSelectedFacility(null);
+
+						if (mapRef.current) {
+							setTimeout(() => {
+								mapRef.current.flyTo([myLocation.lat, myLocation.lng], 12);
+							}, 100);
+						}
+						setIsLoadingLocation(false);
+						return;
+					}
+
+					// Jika berada di Semarang, lanjutkan seperti biasa
+					console.log("✅ Location within Semarang bounds");
 					setLocationMessage({
-						type: "warning",
-						title: "Lokasi Di Luar Semarang",
-						message: message,
-						showMap: true,
+						type: "success",
+						title: "Lokasi Ditemukan",
+						message:
+							"Lokasi Anda berada di Semarang. Silakan cari fasilitas publik di sekitar Anda.",
+						showMap: false,
+						showCoordinates: true,
+						coordinates: myLocation,
 					});
 
-					// Tetap tampilkan lokasi user di peta tapi dengan pesan
 					setMapCenter([myLocation.lat, myLocation.lng]);
 					setUserPin(myLocation);
 					setSelectedFacility(null);
 
 					if (mapRef.current) {
 						setTimeout(() => {
-							mapRef.current.flyTo([myLocation.lat, myLocation.lng], 12);
+							mapRef.current.flyTo([myLocation.lat, myLocation.lng], 16);
 						}, 100);
 					}
 					setIsLoadingLocation(false);
-					return;
+					console.log("✅ Location successfully set on map");
+					console.log("✅ Geolocation process completed");
+					console.log("✅ User location process finished successfully");
+					console.log("✅ User location is within Semarang bounds");
+					console.log("✅ User location process completed successfully");
+				},
+				(error) => {
+					console.error("❌ Error getting location:", error);
+					console.error("❌ Error code:", error.code);
+					console.error("❌ Error message:", error.message);
+
+					let errorMessage = "Gagal mendapatkan lokasi Anda.";
+					let errorTitle = "Error Lokasi";
+					let showInstructions = false;
+
+					switch (error.code) {
+						case error.PERMISSION_DENIED:
+							errorTitle = "Akses Lokasi Ditolak";
+							errorMessage =
+								"Akses lokasi ditolak oleh browser. Silakan ikuti langkah berikut untuk mengizinkan akses lokasi:";
+							showInstructions = true;
+							break;
+						case error.POSITION_UNAVAILABLE:
+							errorTitle = "Lokasi Tidak Tersedia";
+							errorMessage =
+								"Informasi lokasi tidak tersedia. Pastikan GPS aktif dan Anda berada di area dengan sinyal yang baik.";
+							break;
+						case error.TIMEOUT:
+							errorTitle = "Waktu Habis";
+							errorMessage =
+								"Waktu permintaan lokasi habis. Silakan coba lagi atau gunakan lokasi manual di peta.";
+							break;
+						default:
+							errorTitle = "Error Lokasi";
+							errorMessage =
+								"Terjadi kesalahan saat mendapatkan lokasi. Silakan coba lagi atau gunakan lokasi manual di peta.";
+					}
+
+					setLocationMessage({
+						type: "error",
+						title: errorTitle,
+						message: errorMessage,
+						showMap: false,
+						showInstructions: showInstructions,
+					});
+
+					// Fallback ke Simpang Lima jika gagal mendapatkan lokasi
+					console.log("🔄 Falling back to default location (Simpang Lima)");
+					const defaultLocation = {
+						lat: SIMPANG_LIMA_COORDS[0],
+						lng: SIMPANG_LIMA_COORDS[1],
+					};
+					setMapCenter(SIMPANG_LIMA_COORDS);
+					setUserPin(defaultLocation);
+					setSelectedFacility(null);
+
+					if (mapRef.current) {
+						setTimeout(() => {
+							mapRef.current.flyTo(SIMPANG_LIMA_COORDS, 16);
+						}, 100);
+					}
+					setIsLoadingLocation(false);
+					console.log("❌ Geolocation process failed");
+				},
+				{
+					enableHighAccuracy: true,
+					timeout: 15000, // Tambah timeout menjadi 15 detik
+					maximumAge: 30000, // Kurangi maximum age untuk akurasi yang lebih baik
 				}
-
-				// Jika berada di Semarang, lanjutkan seperti biasa
-				setLocationMessage({
-					type: "success",
-					title: "Lokasi Ditemukan",
-					message:
-						"Lokasi Anda berada di Semarang. Silakan cari fasilitas publik di sekitar Anda.",
-					showMap: false,
-				});
-
-				setMapCenter([myLocation.lat, myLocation.lng]);
-				setUserPin(myLocation);
-				setSelectedFacility(null);
-
-				if (mapRef.current) {
-					setTimeout(() => {
-						mapRef.current.flyTo([myLocation.lat, myLocation.lng], 16);
-					}, 100);
-				}
-				setIsLoadingLocation(false);
-			},
-			(error) => {
-				console.error("Error getting location:", error);
-				let errorMessage = "Gagal mendapatkan lokasi Anda.";
-				let errorTitle = "Error Lokasi";
-
-				switch (error.code) {
-					case error.PERMISSION_DENIED:
-						errorTitle = "Akses Lokasi Ditolak";
-						errorMessage =
-							"Akses lokasi ditolak. Silakan izinkan akses lokasi di pengaturan browser Anda.";
-						break;
-					case error.POSITION_UNAVAILABLE:
-						errorTitle = "Lokasi Tidak Tersedia";
-						errorMessage = "Informasi lokasi tidak tersedia.";
-						break;
-					case error.TIMEOUT:
-						errorTitle = "Waktu Habis";
-						errorMessage = "Waktu permintaan lokasi habis.";
-						break;
-					default:
-						errorTitle = "Error Lokasi";
-						errorMessage = "Terjadi kesalahan saat mendapatkan lokasi.";
-				}
-
-				setLocationMessage({
-					type: "error",
-					title: errorTitle,
-					message: errorMessage,
-					showMap: false,
-				});
-
-				// Fallback ke Simpang Lima jika gagal mendapatkan lokasi
-				const defaultLocation = {
-					lat: SIMPANG_LIMA_COORDS[0],
-					lng: SIMPANG_LIMA_COORDS[1],
-				};
-				setMapCenter(SIMPANG_LIMA_COORDS);
-				setUserPin(defaultLocation);
-				setSelectedFacility(null);
-
-				if (mapRef.current) {
-					setTimeout(() => {
-						mapRef.current.flyTo(SIMPANG_LIMA_COORDS, 16);
-					}, 100);
-				}
-				setIsLoadingLocation(false);
-			},
-			{
-				enableHighAccuracy: true,
-				timeout: 10000,
-				maximumAge: 60000,
-			}
-		);
+			);
+			console.log("🔄 Geolocation request started with 15s timeout");
+		}
 	};
 
 	const handleCheckFacilities = async () => {
@@ -713,6 +853,114 @@ const MapPage = () => {
 										Peta akan menampilkan lokasi Anda. Anda dapat mencari
 										fasilitas di Semarang dengan menandai lokasi di peta.
 									</p>
+								)}
+								{locationMessage.showCoordinates && (
+									<div className="mt-3 p-3 bg-green-600 bg-opacity-30 rounded-lg">
+										<h4 className="font-semibold text-sm mb-2">
+											Koordinat Lokasi Anda:
+										</h4>
+										<div className="text-xs space-y-1 font-mono">
+											<p>
+												Latitude: {locationMessage.coordinates.lat.toFixed(6)}
+											</p>
+											<p>
+												Longitude: {locationMessage.coordinates.lng.toFixed(6)}
+											</p>
+										</div>
+									</div>
+								)}
+								{locationMessage.showAccuracyInfo && (
+									<div className="mt-3 p-3 bg-yellow-600 bg-opacity-30 rounded-lg">
+										<h4 className="font-semibold text-sm mb-2">
+											Tips Meningkatkan Akurasi:
+										</h4>
+										<div className="text-xs space-y-1">
+											<p>• Pastikan GPS aktif di perangkat</p>
+											<p>• Berada di area terbuka (tidak di dalam gedung)</p>
+											<p>
+												• Tunggu beberapa detik untuk akurasi yang lebih baik
+											</p>
+											<p>• Coba refresh halaman jika akurasi masih rendah</p>
+										</div>
+									</div>
+								)}
+								{locationMessage.showInstructions && (
+									<div className="mt-3 p-3 bg-black bg-opacity-30 rounded-lg">
+										<h4 className="font-semibold text-sm mb-2">
+											Cara Mengizinkan Akses Lokasi:
+										</h4>
+										<div className="text-xs space-y-1">
+											{(() => {
+												const browser = getBrowserInfo();
+												switch (browser) {
+													case "Chrome":
+													case "Edge":
+														return (
+															<>
+																<p>
+																	<strong>Chrome/Edge:</strong>
+																</p>
+																<p>1. Klik ikon 🔒 di address bar</p>
+																<p>2. Pilih "Allow" untuk lokasi</p>
+																<p>3. Refresh halaman</p>
+															</>
+														);
+													case "Firefox":
+														return (
+															<>
+																<p>
+																	<strong>Firefox:</strong>
+																</p>
+																<p>1. Klik ikon 🛡️ di address bar</p>
+																<p>2. Pilih "Allow" untuk lokasi</p>
+																<p>3. Refresh halaman</p>
+															</>
+														);
+													case "Safari":
+														return (
+															<>
+																<p>
+																	<strong>Safari:</strong>
+																</p>
+																<p>1. Safari → Preferences → Privacy</p>
+																<p>2. Pilih "Allow" untuk lokasi</p>
+																<p>3. Refresh halaman</p>
+															</>
+														);
+													default:
+														return (
+															<>
+																<p>
+																	<strong>Browser Umum:</strong>
+																</p>
+																<p>1. Cari ikon 🔒 atau 🛡️ di address bar</p>
+																<p>2. Pilih "Allow" untuk lokasi</p>
+																<p>3. Refresh halaman</p>
+															</>
+														);
+												}
+											})()}
+										</div>
+										<button
+											onClick={() => {
+												setLocationMessage(null);
+												setTimeout(() => handleUseMyLocation(), 500);
+											}}
+											className="mt-3 w-full bg-blue-600 hover:bg-blue-700 text-white text-xs py-2 px-3 rounded transition-colors duration-200"
+										>
+											Coba Lagi Setelah Mengatur Izin
+										</button>
+									</div>
+								)}
+								{locationMessage.showMap && (
+									<div className="mt-3 p-3 bg-blue-600 bg-opacity-30 rounded-lg">
+										<h4 className="font-semibold text-sm mb-2">Alternatif:</h4>
+										<div className="text-xs space-y-1">
+											<p>Anda dapat mencari fasilitas di Semarang dengan:</p>
+											<p>• Klik di peta untuk menandai lokasi</p>
+											<p>• Gunakan search bar untuk mencari alamat</p>
+										</div>
+									</div>
 								)}
 							</div>
 							<button
