@@ -49,10 +49,23 @@ const FacilityDetailCard = ({ facility, onClose }) => {
 	const [currentY, setCurrentY] = useState(0);
 	const [isMobile, setIsMobile] = useState(window.innerWidth <= 810);
 	const [isLandscapeMobile, setIsLandscapeMobile] = useState(false);
+	const [isLoadingRoute, setIsLoadingRoute] = useState(false);
+	const [errorMessage, setErrorMessage] = useState(null);
 	const sheetRef = useRef(null);
 
 	useEffect(() => {
 		setIsOpen(!!facility);
+		if (facility) {
+			console.log("📋 Facility detail card opened for:", facility.name);
+			console.log("📍 Facility position:", facility.position);
+			console.log("🏷️ Facility type:", facility.type);
+		}
+
+		return () => {
+			if (facility) {
+				console.log("👋 Facility detail card unmounting for:", facility.name);
+			}
+		};
 	}, [facility]);
 
 	useEffect(() => {
@@ -66,13 +79,134 @@ const FacilityDetailCard = ({ facility, onClose }) => {
 		};
 		handleResize();
 		window.addEventListener("resize", handleResize);
-		return () => window.removeEventListener("resize", handleResize);
+		return () => {
+			console.log("🧹 Cleaning up facility detail card resize listener");
+			window.removeEventListener("resize", handleResize);
+		};
 	}, []);
 
-	if (!facility) return null;
+	if (!facility) {
+		console.log("📋 Facility detail card: no facility data");
+		return null;
+	}
 
 	const { name, type, address, contact, hours } = facility;
 	const facilityIcon = getIconForType(type);
+
+	console.log("📋 Facility detail card rendering with data:", {
+		name,
+		type,
+		address,
+		contact,
+		hours,
+		position: facility.position,
+		icon: facilityIcon,
+	});
+
+	// Fungsi untuk mendapatkan lokasi user saat ini
+	const getUserLocation = () => {
+		console.log("📍 Getting user location...");
+		return new Promise((resolve, reject) => {
+			if (!navigator.geolocation) {
+				console.error("❌ Geolocation tidak didukung");
+				reject(new Error("Geolocation tidak didukung"));
+				return;
+			}
+
+			console.log("📍 Requesting geolocation...");
+			navigator.geolocation.getCurrentPosition(
+				(position) => {
+					console.log("✅ User location obtained:", {
+						lat: position.coords.latitude,
+						lng: position.coords.longitude,
+						accuracy: position.coords.accuracy,
+					});
+					console.log(
+						"✅ User location accuracy:",
+						position.coords.accuracy,
+						"meters"
+					);
+					resolve({
+						lat: position.coords.latitude,
+						lng: position.coords.longitude,
+					});
+				},
+				(error) => {
+					console.error("❌ Geolocation error:", error);
+					console.error("❌ Error code:", error.code);
+					console.error("❌ Error message:", error.message);
+					reject(error);
+				},
+				{
+					enableHighAccuracy: true,
+					timeout: 10000,
+					maximumAge: 60000,
+				}
+			);
+		});
+	};
+
+	// Fungsi untuk membuka Google Maps dengan rute menggunakan nama fasilitas
+	const handleOpenRoute = async () => {
+		setIsLoadingRoute(true);
+		setErrorMessage(null); // Clear previous errors
+		console.log("🗺️ Opening route to facility:", facility.name);
+		console.log("📍 Facility address:", facility.address);
+		console.log("📍 Facility type:", facility.type);
+
+		try {
+			const userLocation = await getUserLocation();
+			console.log("📍 User location obtained:", userLocation);
+			console.log("📍 User location for route:", userLocation);
+
+			// Gunakan nama fasilitas dan alamat sebagai destination
+			const destination = encodeURIComponent(
+				`${facility.name}, ${facility.address}`
+			);
+			const origin = `${userLocation.lat},${userLocation.lng}`;
+			console.log("📍 Route origin (user location):", origin);
+			console.log("📍 Route destination (facility):", destination);
+
+			const url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&travelmode=driving`;
+			console.log("🔗 Opening Google Maps URL:", url);
+			console.log("✅ Opening route with user location and facility name");
+			window.open(url, "_blank");
+		} catch (error) {
+			console.error("❌ Error getting user location:", error);
+			setErrorMessage(
+				"Gagal mengambil lokasi Anda. Silakan pastikan GPS Anda aktif."
+			);
+			// Fallback: buka Google Maps dengan hanya destination menggunakan nama fasilitas
+			const destination = encodeURIComponent(
+				`${facility.name}, ${facility.address}`
+			);
+			const url = `https://www.google.com/maps/dir/?api=1&destination=${destination}`;
+			console.log("📍 Fallback route destination (facility):", destination);
+			console.log("🔄 Fallback - Opening Google Maps URL:", url);
+			console.log("⚠️ Opening route without user location (fallback)");
+			window.open(url, "_blank");
+		} finally {
+			setIsLoadingRoute(false);
+			console.log("✅ Route opening process completed");
+		}
+	};
+
+	// Fungsi untuk membuka Google Maps dengan lokasi fasilitas menggunakan nama fasilitas
+	const handleOpenMaps = () => {
+		console.log("🗺️ Opening Maps for facility:", facility.name);
+		console.log("📍 Facility address:", facility.address);
+		console.log("📍 Facility type:", facility.type);
+
+		// Gunakan nama fasilitas dan alamat untuk pencarian
+		const searchQuery = encodeURIComponent(
+			`${facility.name}, ${facility.address}`
+		);
+		const url = `https://www.google.com/maps/search/?api=1&query=${searchQuery}`;
+		console.log("🔗 Opening Google Maps URL:", url);
+		console.log("✅ Opening Maps with facility name and address");
+		console.log("✅ Maps opening process completed");
+		window.open(url, "_blank");
+	};
 
 	const handleTouchStart = (e) => {
 		setStartY(e.touches[0].clientY);
@@ -90,6 +224,7 @@ const FacilityDetailCard = ({ facility, onClose }) => {
 	const handleTouchEnd = () => {
 		const deltaY = currentY - startY;
 		if (deltaY > 100) {
+			console.log("👋 Facility detail card closed by swipe");
 			onClose();
 		} else if (sheetRef.current) {
 			sheetRef.current.style.transform = "";
@@ -110,7 +245,10 @@ const FacilityDetailCard = ({ facility, onClose }) => {
 			<div className="facility-detail-content px-6">
 				<div className="relative bg-white pt-4 pb-1 mb-2">
 					<button
-						onClick={onClose}
+						onClick={() => {
+							console.log("👋 Facility detail card closed by button");
+							onClose();
+						}}
 						className="absolute top-0 -right-2 p-1.5 bg-white hover:bg-gray-100 rounded-full transition-colors shadow-md"
 					>
 						<svg
@@ -223,38 +361,57 @@ const FacilityDetailCard = ({ facility, onClose }) => {
 							</div>
 						</div>
 					)}
+					{errorMessage && (
+						<div className="text-red-500 text-xs mt-2">{errorMessage}</div>
+					)}
 					{/* Action buttons */}
 					<div className="flex gap-2 mt-3 sm:mt-4">
 						<button
-							onClick={() =>
-								window.open(
-									`https://www.google.com/maps/dir/?api=1&destination=${facility.lat},${facility.lng}`
-								)
-							}
-							className="flex-1 bg-brand-dark-blue text-white py-1.5 sm:py-2 px-3 sm:px-4 rounded-lg text-xs sm:text-sm font-medium hover:bg-opacity-90 transition-colors flex items-center justify-center gap-1.5 sm:gap-2"
+							onClick={handleOpenRoute}
+							disabled={isLoadingRoute}
+							className="flex-1 bg-brand-dark-blue text-white py-1.5 sm:py-2 px-3 sm:px-4 rounded-lg text-xs sm:text-sm font-medium hover:bg-opacity-90 transition-colors flex items-center justify-center gap-1.5 sm:gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
 						>
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								fill="none"
-								viewBox="0 0 24 24"
-								strokeWidth={1.5}
-								stroke="currentColor"
-								className="w-4 h-4 sm:w-5 sm:h-5"
-							>
-								<path
-									strokeLinecap="round"
-									strokeLinejoin="round"
-									d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z"
-								/>
-							</svg>
-							Rute
+							{isLoadingRoute ? (
+								<svg
+									className="animate-spin -ml-1 mr-2 h-4 w-4 sm:h-5 sm:w-5 text-white"
+									xmlns="http://www.w3.org/2000/svg"
+									fill="none"
+									viewBox="0 0 24 24"
+								>
+									<circle
+										className="opacity-25"
+										cx="12"
+										cy="12"
+										r="10"
+										stroke="currentColor"
+										strokeWidth="4"
+									></circle>
+									<path
+										className="opacity-75"
+										fill="currentColor"
+										d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+									></path>
+								</svg>
+							) : (
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									fill="none"
+									viewBox="0 0 24 24"
+									strokeWidth={1.5}
+									stroke="currentColor"
+									className="w-4 h-4 sm:w-5 sm:h-5"
+								>
+									<path
+										strokeLinecap="round"
+										strokeLinejoin="round"
+										d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z"
+									/>
+								</svg>
+							)}
+							{isLoadingRoute ? "Mengambil Lokasi..." : "Rute"}
 						</button>
 						<button
-							onClick={() =>
-								window.open(
-									`https://www.google.com/maps/search/?api=1&query=${facility.lat},${facility.lng}`
-								)
-							}
+							onClick={handleOpenMaps}
 							className="flex-1 bg-white border-2 border-brand-dark-blue text-brand-dark-blue py-1.5 sm:py-2 px-3 sm:px-4 rounded-lg text-xs sm:text-sm font-medium hover:bg-gray-50 transition-colors flex items-center justify-center gap-1.5 sm:gap-2"
 						>
 							<svg
@@ -306,7 +463,12 @@ const FacilityDetailCard = ({ facility, onClose }) => {
 				<div className="relative bg-white border-b border-gray-200 px-4 py-2">
 					{/* Close Button */}
 					<button
-						onClick={onClose}
+						onClick={() => {
+							console.log(
+								"👋 Facility detail card closed by button (landscape)"
+							);
+							onClose();
+						}}
 						className="absolute top-2 right-2 p-1 bg-gray-100 hover:bg-gray-200 rounded-full transition-colors"
 					>
 						<svg
@@ -429,6 +591,9 @@ const FacilityDetailCard = ({ facility, onClose }) => {
 								</div>
 							</div>
 						)}
+						{errorMessage && (
+							<div className="text-red-500 text-xs mt-2">{errorMessage}</div>
+						)}
 					</div>
 				</div>
 
@@ -436,35 +601,51 @@ const FacilityDetailCard = ({ facility, onClose }) => {
 				<div className="border-t border-gray-200 bg-white px-4 py-2">
 					<div className="flex gap-2">
 						<button
-							onClick={() =>
-								window.open(
-									`https://www.google.com/maps/dir/?api=1&destination=${facility.lat},${facility.lng}`
-								)
-							}
-							className="flex-1 bg-brand-dark-blue text-white py-2 px-3 rounded-lg text-xs font-medium hover:bg-opacity-90 transition-colors flex items-center justify-center gap-1"
+							onClick={handleOpenRoute}
+							disabled={isLoadingRoute}
+							className="flex-1 bg-brand-dark-blue text-white py-2 px-3 rounded-lg text-xs font-medium hover:bg-opacity-90 transition-colors flex items-center justify-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed"
 						>
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								fill="none"
-								viewBox="0 0 24 24"
-								strokeWidth={1.5}
-								stroke="currentColor"
-								className="w-3 h-3"
-							>
-								<path
-									strokeLinecap="round"
-									strokeLinejoin="round"
-									d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z"
-								/>
-							</svg>
-							Rute
+							{isLoadingRoute ? (
+								<svg
+									className="animate-spin -ml-1 mr-1 h-3 w-3 text-white"
+									xmlns="http://www.w3.org/2000/svg"
+									fill="none"
+									viewBox="0 0 24 24"
+								>
+									<circle
+										className="opacity-25"
+										cx="12"
+										cy="12"
+										r="10"
+										stroke="currentColor"
+										strokeWidth="4"
+									></circle>
+									<path
+										className="opacity-75"
+										fill="currentColor"
+										d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+									></path>
+								</svg>
+							) : (
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									fill="none"
+									viewBox="0 0 24 24"
+									strokeWidth={1.5}
+									stroke="currentColor"
+									className="w-3 h-3"
+								>
+									<path
+										strokeLinecap="round"
+										strokeLinejoin="round"
+										d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z"
+									/>
+								</svg>
+							)}
+							{isLoadingRoute ? "Loading..." : "Rute"}
 						</button>
 						<button
-							onClick={() =>
-								window.open(
-									`https://www.google.com/maps/search/?api=1&query=${facility.lat},${facility.lng}`
-								)
-							}
+							onClick={handleOpenMaps}
 							className="flex-1 bg-white border-2 border-brand-dark-blue text-brand-dark-blue py-2 px-3 rounded-lg text-xs font-medium hover:bg-gray-50 transition-colors flex items-center justify-center gap-1"
 						>
 							<svg
@@ -500,7 +681,10 @@ const FacilityDetailCard = ({ facility, onClose }) => {
 			<div className="bg-white rounded-2xl shadow-2xl overflow-hidden">
 				<div className="relative bg-white pt-4 pb-1 mb-2">
 					<button
-						onClick={onClose}
+						onClick={() => {
+							console.log("👋 Facility detail card closed by button (desktop)");
+							onClose();
+						}}
 						className="absolute top-2 right-4 p-1.5 bg-white hover:bg-gray-100 rounded-full transition-colors shadow-md"
 					>
 						<svg
@@ -615,39 +799,57 @@ const FacilityDetailCard = ({ facility, onClose }) => {
 							</div>
 						</div>
 					)}
-
+					{errorMessage && (
+						<div className="text-red-500 text-xs mt-2">{errorMessage}</div>
+					)}
 					{/* Action buttons with bottom padding */}
 					<div className="flex gap-2 mt-3 sm:mt-4 pb-6">
 						<button
-							onClick={() =>
-								window.open(
-									`https://www.google.com/maps/dir/?api=1&destination=${facility.lat},${facility.lng}`
-								)
-							}
-							className="flex-1 bg-brand-dark-blue text-white py-1.5 sm:py-2 px-3 sm:px-4 rounded-lg text-xs sm:text-sm font-medium hover:bg-opacity-90 transition-colors flex items-center justify-center gap-1.5 sm:gap-2"
+							onClick={handleOpenRoute}
+							disabled={isLoadingRoute}
+							className="flex-1 bg-brand-dark-blue text-white py-1.5 sm:py-2 px-3 sm:px-4 rounded-lg text-xs sm:text-sm font-medium hover:bg-opacity-90 transition-colors flex items-center justify-center gap-1.5 sm:gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
 						>
-							<svg
-								xmlns="http://www.w3.org/2000/svg"
-								fill="none"
-								viewBox="0 0 24 24"
-								strokeWidth={1.5}
-								stroke="currentColor"
-								className="w-4 h-4 sm:w-5 sm:h-5"
-							>
-								<path
-									strokeLinecap="round"
-									strokeLinejoin="round"
-									d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z"
-								/>
-							</svg>
-							Rute
+							{isLoadingRoute ? (
+								<svg
+									className="animate-spin -ml-1 mr-2 h-4 w-4 sm:h-5 sm:w-5 text-white"
+									xmlns="http://www.w3.org/2000/svg"
+									fill="none"
+									viewBox="0 0 24 24"
+								>
+									<circle
+										className="opacity-25"
+										cx="12"
+										cy="12"
+										r="10"
+										stroke="currentColor"
+										strokeWidth="4"
+									></circle>
+									<path
+										className="opacity-75"
+										fill="currentColor"
+										d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+									></path>
+								</svg>
+							) : (
+								<svg
+									xmlns="http://www.w3.org/2000/svg"
+									fill="none"
+									viewBox="0 0 24 24"
+									strokeWidth={1.5}
+									stroke="currentColor"
+									className="w-4 h-4 sm:w-5 sm:h-5"
+								>
+									<path
+										strokeLinecap="round"
+										strokeLinejoin="round"
+										d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z"
+									/>
+								</svg>
+							)}
+							{isLoadingRoute ? "Mengambil Lokasi..." : "Rute"}
 						</button>
 						<button
-							onClick={() =>
-								window.open(
-									`https://www.google.com/maps/search/?api=1&query=${facility.lat},${facility.lng}`
-								)
-							}
+							onClick={handleOpenMaps}
 							className="flex-1 bg-white border-2 border-brand-dark-blue text-brand-dark-blue py-1.5 sm:py-2 px-3 sm:px-4 rounded-lg text-xs sm:text-sm font-medium hover:bg-gray-50 transition-colors flex items-center justify-center gap-1.5 sm:gap-2"
 						>
 							<svg
@@ -683,16 +885,34 @@ const FacilityDetailCard = ({ facility, onClose }) => {
 			{!isMobile && (
 				<div
 					className="fixed inset-0 bg-black bg-opacity-50 z-20"
-					onClick={onClose}
+					onClick={() => {
+						console.log("👋 Facility detail card closed by overlay click");
+						onClose();
+					}}
 				/>
 			)}
 
 			{/* Render content based on screen size */}
-			{isMobile
-				? renderMobileContent()
-				: isLandscapeMobile
-				? renderDesktopContent()
-				: renderDesktopContent()}
+			{(() => {
+				console.log("📱 Rendering facility detail card:", {
+					isMobile,
+					isLandscapeMobile,
+					screenWidth: window.innerWidth,
+					screenHeight: window.innerHeight,
+					facilityName: facility.name,
+					facilityType: facility.type,
+					hasContact: !!contact,
+					hasHours: !!hours,
+				});
+
+				if (isMobile) {
+					return renderMobileContent();
+				} else if (isLandscapeMobile) {
+					return renderDesktopContent();
+				} else {
+					return renderDesktopContent();
+				}
+			})()}
 		</>
 	);
 };

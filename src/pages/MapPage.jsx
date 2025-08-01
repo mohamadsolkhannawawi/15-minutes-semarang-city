@@ -94,6 +94,22 @@ const getBrowserInfo = () => {
 	}
 };
 
+// Fungsi untuk menghitung jarak antara dua koordinat (dalam km)
+const calculateDistance = (lat1, lng1, lat2, lng2) => {
+	const R = 6371; // Radius bumi dalam km
+	const dLat = ((lat2 - lat1) * Math.PI) / 180;
+	const dLng = ((lng2 - lng1) * Math.PI) / 180;
+	const a =
+		Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+		Math.cos((lat1 * Math.PI) / 180) *
+			Math.cos((lat2 * Math.PI) / 180) *
+			Math.sin(dLng / 2) *
+			Math.sin(dLng / 2);
+	const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+	const distance = R * c;
+	return distance.toFixed(2);
+};
+
 const MapPage = () => {
 	const [mapCenter, setMapCenter] = useState(SIMPANG_LIMA_COORDS);
 	const [userPin, setUserPin] = useState(null);
@@ -456,8 +472,37 @@ const MapPage = () => {
 						"📍 Within Semarang bounds:",
 						isWithinSemarang(myLocation.lat, myLocation.lng)
 					);
+					console.log(
+						"📍 Detected coordinates:",
+						`${myLocation.lat}, ${myLocation.lng}`
+					);
+					console.log(
+						"📍 Expected coordinates (Randublatung): -7.192993, 111.341835"
+					);
+					console.log(
+						"📍 Distance from expected location:",
+						calculateDistance(
+							myLocation.lat,
+							myLocation.lng,
+							-7.192993,
+							111.341835
+						),
+						"km"
+					);
 
 					// Cek akurasi lokasi
+					const distanceFromExpected = calculateDistance(
+						myLocation.lat,
+						myLocation.lng,
+						-7.192993,
+						111.341835
+					);
+					console.log(
+						"📍 Distance from expected location:",
+						distanceFromExpected,
+						"km"
+					);
+
 					if (position.coords.accuracy > 1000) {
 						console.log(
 							"⚠️ Low accuracy location:",
@@ -474,11 +519,33 @@ const MapPage = () => {
 							showAccuracyInfo: true,
 							accuracy: position.coords.accuracy,
 						});
+					} else if (distanceFromExpected > 10) {
+						console.log(
+							"⚠️ Location seems inaccurate - far from expected location:",
+							distanceFromExpected,
+							"km from expected"
+						);
+						console.log(
+							"⚠️ Expected: Randublatung, Blora (-7.192993, 111.341835)"
+						);
+						console.log("⚠️ Detected:", `${myLocation.lat}, ${myLocation.lng}`);
+						setLocationMessage({
+							type: "warning",
+							title: "Lokasi Mungkin Tidak Akurat",
+							message: `Lokasi terdeteksi ${distanceFromExpected} km dari lokasi yang diharapkan (Randublatung, Blora). GPS mungkin tidak akurat. Silakan gunakan lokasi manual di peta jika diperlukan.`,
+							showMap: false,
+							showAccuracyInfo: true,
+							accuracy: position.coords.accuracy,
+							showManualLocationOption: true,
+						});
 					} else {
 						console.log(
 							"✅ Good accuracy location:",
 							position.coords.accuracy,
 							"meters"
+						);
+						console.log(
+							"✅ Location is within reasonable distance from expected"
 						);
 					}
 
@@ -547,6 +614,10 @@ const MapPage = () => {
 					console.log("✅ User location process finished successfully");
 					console.log("✅ User location is within Semarang bounds");
 					console.log("✅ User location process completed successfully");
+					console.log(
+						"✅ Final location coordinates:",
+						`${myLocation.lat}, ${myLocation.lng}`
+					);
 				},
 				(error) => {
 					console.error("❌ Error getting location:", error);
@@ -881,6 +952,20 @@ const MapPage = () => {
 												• Tunggu beberapa detik untuk akurasi yang lebih baik
 											</p>
 											<p>• Coba refresh halaman jika akurasi masih rendah</p>
+										</div>
+									</div>
+								)}
+								{locationMessage.showManualLocationOption && (
+									<div className="mt-3 p-3 bg-blue-600 bg-opacity-30 rounded-lg">
+										<h4 className="font-semibold text-sm mb-2">
+											Opsi Lokasi Manual:
+										</h4>
+										<div className="text-xs space-y-1">
+											<p>• Klik di peta untuk menandai lokasi yang benar</p>
+											<p>• Gunakan search bar untuk mencari alamat</p>
+											<p>
+												• Atau gunakan lokasi terdeteksi jika sudah cukup akurat
+											</p>
 										</div>
 									</div>
 								)}
