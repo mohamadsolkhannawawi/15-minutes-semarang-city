@@ -11,6 +11,7 @@ use App\Http\Controllers\Api\ServiceImageController;
 use App\Http\Controllers\Api\ServiceReviewController;
 use App\Http\Controllers\Api\UserSearchController;
 use App\Http\Controllers\Api\WalkabilityZoneController;
+use App\Http\Controllers\Api\KelurahanController;
 
 /*
 |--------------------------------------------------------------------------
@@ -33,3 +34,10 @@ Route::get('services/in-zone/{search_id}', [PublicServiceController::class, 'get
 
 // Endpoint untuk mengecek apakah sebuah titik sudah ada di dalam zona yang tersimpan
 Route::post('walkability-zones/check', [WalkabilityZoneController::class, 'check']);
+
+// Rute untuk mendapatkan info region berdasarkan koordinat
+Route::post('/region-info', [App\Http\Controllers\Api\DistrictController::class, 'getRegionInfoByCoords']);
+
+Route::get('kelurahan/{id}', [KelurahanController::class, 'show']);
+Route::get('kelurahan/{id}/info', [KelurahanController::class, 'showInfo']);
+

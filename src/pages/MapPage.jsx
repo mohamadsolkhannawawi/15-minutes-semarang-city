@@ -115,6 +115,7 @@ const MapPage = () => {
 	const [userPin, setUserPin] = useState(null);
 	const [showResults, setShowResults] = useState(false);
 	const [facilities, setFacilities] = useState([]);
+	const [geoInfo, setGeoInfo] = useState({}); 
 	const [selectedFacility, setSelectedFacility] = useState(null);
 	const [activeFilter, setActiveFilter] = useState("all");
 	const [isMobile, setIsMobile] = useState(window.innerWidth <= 810);
@@ -391,6 +392,7 @@ const MapPage = () => {
 	const handleUseMyLocation = () => {
 		setIsLoadingLocation(true);
 		setError(null);
+		setLocationMessage(null);
 
 		console.log("🌐 Browser:", getBrowserInfo());
 		console.log("🌐 User Agent:", navigator.userAgent);
@@ -701,6 +703,27 @@ const MapPage = () => {
 		try {
 			const { lat, lng } = userPin;
 			console.log(`📍 Lokasi dipilih: ${lat}, ${lng}`);
+
+			console.log("🌍 [Baru] Mengambil informasi wilayah...");
+			try {
+				const regionResponse = await api.post('/region-info', { lat, lng });
+				setGeoInfo({
+					populationDensity: `${regionResponse.data.population_density} /km²`,
+					kecamatan: regionResponse.data.kecamatan,
+					kelurahan: regionResponse.data.kelurahan,
+					population_percentage: `${regionResponse.data.population_percentage} %`,
+				});
+				console.log("✅ [Baru] Informasi wilayah diterima:", regionResponse.data);
+			} catch (regionError) {
+				console.warn("⚠️ Tidak dapat mengambil info wilayah, mungkin di luar jangkauan:", regionError.response?.data?.message);
+				// Reset info jika lokasi di luar jangkauan
+				setGeoInfo({
+					populationDensity: "N/A",
+					kecamatan: "Di luar area",
+					kelurahan: "Di luar area",
+					population_percentage: "N/A",
+				});
+			}
 
 			console.log("🔍 [1/5] Mengecek cache di database...");
 			const checkResult = await api.post("/walkability-zones/check", {
@@ -1268,7 +1291,7 @@ const MapPage = () => {
 				<SidePanel
 					isVisible={showResults && !selectedFacility}
 					facilities={filteredFacilities}
-					geoInfo={{}}
+					geoInfo={geoInfo}
 					onFacilitySelect={handleFacilitySelect}
 					onClose={resetView}
 				/>

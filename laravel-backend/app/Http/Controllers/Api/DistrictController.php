@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\District;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DistrictController extends Controller
 {
@@ -30,9 +31,62 @@ class DistrictController extends Controller
         return response()->json($district, 201);
     }
 
+    /**
+     * Tampilkan detail district beserta kelurahannya (dengan polygon)
+     */
     public function show($id)
     {
-        $district = District::findOrFail($id);
+        // Ambil district dengan GeoJSON polygon
+        $district = DB::table('districts')
+            ->select(
+                'id',
+                'name',
+                'persentase_penduduk',
+                'kepadatan_penduduk_per_km2',
+                DB::raw('ST_AsGeoJSON(polygon)::json as polygon')
+            )
+            ->where('id', $id)
+            ->first();
+
+        if (!$district) {
+            return response()->json(['message' => 'District not found'], 404);
+        }
+
+        // Ambil kelurahan terkait dengan GeoJSON polygon
+        $kelurahans = DB::table('kelurahans')
+            ->select(
+                'id',
+                'name',
+                'district_id',
+                DB::raw('ST_AsGeoJSON(polygon)::json as polygon')
+            )
+            ->where('district_id', $id)
+            ->get();
+
+        $district->kelurahans = $kelurahans;
+
+        return response()->json($district);
+    }
+
+    /**
+     * Tampilkan detail district tanpa polygon (ringkas)
+     */
+    public function detail($id)
+    {
+        $district = DB::table('districts')
+            ->select(
+                'id',
+                'name',
+                'persentase_penduduk',
+                'kepadatan_penduduk_per_km2'
+            )
+            ->where('id', $id)
+            ->first();
+
+        if (!$district) {
+            return response()->json(['message' => 'District not found'], 404);
+        }
+
         return response()->json($district);
     }
 
@@ -61,5 +115,43 @@ class DistrictController extends Controller
         $district->delete();
 
         return response()->json(['message' => 'Deleted successfully']);
+    }
+
+    /**
+     * Cari informasi Kecamatan dan Kelurahan berdasarkan koordinat lat/lng.
+     */
+    public function getRegionInfoByCoords(Request $request)
+    {
+        $validated = $request->validate([
+            'lat' => 'required|numeric',
+            'lng' => 'required|numeric',
+        ]);
+
+        // Buat WKT (Well-Known Text) untuk titik dari koordinat
+        $pointWkt = "POINT({$validated['lng']} {$validated['lat']})";
+
+        // Cari kecamatan yang poligonnya berisi titik tersebut
+        $district = DB::table('districts')
+            ->select('id', 'name', 'persentase_penduduk', 'kepadatan_penduduk_per_km2')
+            ->whereRaw('ST_Contains(polygon, ST_GeomFromText(?, 4326))', [$pointWkt])
+            ->first();
+
+        if (!$district) {
+            return response()->json(['message' => 'Coordinates outside of any district'], 404);
+        }
+
+        // Cari kelurahan yang poligonnya berisi titik tersebut
+        $kelurahan = DB::table('kelurahans')
+            ->select('name')
+            ->where('district_id', $district->id)
+            ->whereRaw('ST_Contains(polygon, ST_GeomFromText(?, 4326))', [$pointWkt])
+            ->first();
+
+        return response()->json([
+            'kecamatan' => $district->name,
+            'kelurahan' => $kelurahan ? $kelurahan->name : 'N/A', // Handle jika tidak ada kelurahan yg cocok
+            'population_density' => (int) $district->kepadatan_penduduk_per_km2,
+            'population_percentage' => (float) $district->persentase_penduduk,
+        ]);
     }
 }

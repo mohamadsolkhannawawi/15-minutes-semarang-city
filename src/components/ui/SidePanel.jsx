@@ -293,7 +293,7 @@ const SidePanel = ({
 								>
 									{/* Baris 1: Kepadatan Penduduk */}
 									<span></span>
-									<span className="font-bold">Kepadatan Penduduk</span>
+									<span className="font-bold">Kepadatan Penduduk /km²</span>
 									<span className="font-bold">:</span>
 									<span className="ml-1">{geoInfo.populationDensity}</span>
 
@@ -302,6 +302,18 @@ const SidePanel = ({
 									<span className="font-bold">Kecamatan</span>
 									<span className="font-bold">:</span>
 									<span className="ml-1">{geoInfo.kecamatan}</span>
+
+									{/* Baris 3: Kelurahan */}
+									<span></span>
+									<span className="font-bold">Kelurahan</span>
+									<span className="font-bold">:</span>
+									<span className="ml-1">{geoInfo.kelurahan}</span>
+
+									{/* Baris 4: Persentase Penduduk */}
+									<span></span>
+									<span className="font-bold">Persentase Penduduk</span>
+									<span className="font-bold">:</span>
+									<span className="ml-1">{geoInfo.population_percentage}</span>
 								</div>
 							</div>
 						</div>
