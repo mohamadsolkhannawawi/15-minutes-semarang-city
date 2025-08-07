@@ -5,6 +5,7 @@ import { MapContainer, TileLayer, Marker, Polygon } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import clsx from "clsx";
+import * as turf from '@turf/turf';
 
 // Import CSS untuk mobile layout
 import "../styles/mobile.css";
@@ -856,8 +857,8 @@ const MapPage = () => {
 		setShowResults(false);
 		setSelectedFacility(null);
 		setActiveFilter("all");
-		setFacilities([]); // Kosongkan fasilitas saat reset
-		setPolygonCoords([]); // Kosongkan poligon saat reset
+		setFacilities([]); 
+		setPolygonCoords([]); 
 	};
 
 	const handleSearch = async (query) => {
@@ -880,72 +881,44 @@ const MapPage = () => {
 			if (districtResponse.data && districtResponse.data.polygon) {
 				districtFound = true;
 				const districtData = districtResponse.data;
-				
-				// 🔍 DEBUG: Log structure
-				console.log("🔍 [DEBUG] District polygon type:", districtData.polygon.type);
-				console.log("🔍 [DEBUG] District coordinates structure:", districtData.polygon.coordinates);
-				
-				// ✅ Handle MultiPolygon vs Polygon
+							
 				let districtCoords;
 				if (districtData.polygon.type === "MultiPolygon") {
-					// MultiPolygon: coordinates[0][0] contains the actual coordinates
-					console.log("[DEBUG] Processing MultiPolygon district");
-					console.log("[DEBUG] Raw coordinates:", districtData.polygon.coordinates[0][0].slice(0, 3));
 					
 					districtCoords = districtData.polygon.coordinates[0][0].map(([lng, lat]) => {
-						console.log(`[DEBUG] District coord: lng=${lng}, lat=${lat}`);
 						return [lat, lng]; // Flip ke [lat, lng] untuk Leaflet
 					});
 				} else {
-					// Polygon: coordinates[0] contains the actual coordinates
-					console.log("[DEBUG] Processing Polygon district");
 					districtCoords = districtData.polygon.coordinates[0].map(([lng, lat]) => {
-						console.log(`[DEBUG] District coord: lng=${lng}, lat=${lat}`);
 						return [lat, lng]; // Flip ke [lat, lng] untuk Leaflet
 					});
 				}
-				
-				console.log("[DEBUG] Final district coordinates (first 3):", districtCoords.slice(0, 3));
 				setDistrictPolygon(districtCoords);
 
-				// Process kelurahan dengan logic yang sama
-				console.log(`[DEBUG] Processing ${districtData.kelurahans.length} kelurahans...`);
+				const geoJsonPolygon = turf.polygon([districtCoords.map(([lat, lng]) => [lng, lat])]);
+				const centroid = turf.centroid(geoJsonPolygon);
+				const centerPoint = {
+					lat: centroid.geometry.coordinates[1],
+					lng: centroid.geometry.coordinates[0]
+				};
+
+				console.log("[DEBUG] District centroid:", centerPoint);
+				setUserPin(centerPoint);
+				setMapCenter([centerPoint.lat, centerPoint.lng]);
 				
 				const kelurahanCoords = districtData.kelurahans.map((k, index) => {
-					console.log(`[DEBUG] Processing kelurahan ${index}: ${k.name}`);
-					console.log(`[DEBUG] Kelurahan ${k.name} polygon type:`, k.polygon.type);
 					
 					let coords;
 					if (k.polygon.type === "MultiPolygon") {
-						// MultiPolygon: Handle multiple rings if exists
-						console.log(`[DEBUG] Kelurahan ${k.name} is MultiPolygon`);
-						console.log(`[DEBUG] Number of rings:`, k.polygon.coordinates.length);
-						
-						// Take the first (outer) ring: coordinates[0][0]
 						const outerRing = k.polygon.coordinates[0][0];
-						console.log(`[DEBUG] Kelurahan ${k.name} outer ring coordinates:`, outerRing.slice(0, 3));
-						
 						coords = outerRing.map(([lng, lat]) => {
 							return [lat, lng]; // Flip ke [lat, lng] untuk Leaflet
 						});
 					} else {
-						// Polygon: coordinates[0]
-						console.log(`[DEBUG] Kelurahan ${k.name} is Polygon`);
 						coords = k.polygon.coordinates[0].map(([lng, lat]) => {
 							return [lat, lng]; // Flip ke [lat, lng] untuk Leaflet
 						});
 					}
-					
-					console.log(`[DEBUG] Kelurahan ${k.name} final coordinates (first 3):`, coords.slice(0, 3));
-					
-					// Validate coordinates
-					const validCoords = coords.filter(([lat, lng]) => {
-						const validLat = lat >= -7.2 && lat <= -6.8;
-						const validLng = lng >= 110.2 && lng <= 110.6;
-						return validLat && validLng;
-					});
-					
-					console.log(`[DEBUG] Valid coords for ${k.name}: ${validCoords.length}/${coords.length}`);
 					
 					return coords;
 				});
@@ -978,45 +951,33 @@ const MapPage = () => {
 
 		// --- PRIORITAS 2: MENCARI KELURAHAN ---
 		try {
-			// Log URL yang akan dipanggil untuk Kelurahan
-			console.log(`[DEBUG] Mencoba memanggil API Kelurahan: /kelurahans/${query}`);
 			const kelurahanResponse = await api.get(`/kelurahans/${query}`);
-			console.log("[DEBUG] Panggilan API Kelurahan berhasil.", kelurahanResponse);
 
 			if (kelurahanResponse.data && kelurahanResponse.data.polygon) {
-				console.log("🔍 [DEBUG] Kelurahan polygon type:", kelurahanResponse.data.polygon.type);
-				console.log("🔍 [DEBUG] Kelurahan coordinates structure:", kelurahanResponse.data.polygon.coordinates);
-				
-				// ✅ Handle MultiPolygon vs Polygon untuk kelurahan
 				let kelurahanCoords;
-				if (kelurahanResponse.data.polygon.type === "MultiPolygon") {
-					console.log("[DEBUG] Processing MultiPolygon kelurahan");
-					console.log("[DEBUG] Raw coordinates:", kelurahanResponse.data.polygon.coordinates[0][0].slice(0, 3));
-					
+				if (kelurahanResponse.data.polygon.type === "MultiPolygon") {	
 					kelurahanCoords = kelurahanResponse.data.polygon.coordinates[0][0].map(([lng, lat]) => {
-						console.log(`[DEBUG] Kelurahan coord: lng=${lng}, lat=${lat}`);
 						return [lat, lng]; // Flip ke [lat, lng] untuk Leaflet
 					});
 				} else {
-					console.log("[DEBUG] Processing Polygon kelurahan");
 					kelurahanCoords = kelurahanResponse.data.polygon.coordinates[0].map(([lng, lat]) => {
-						console.log(`[DEBUG] Kelurahan coord: lng=${lng}, lat=${lat}`);
 						return [lat, lng]; // Flip ke [lat, lng] untuk Leaflet
 					});
 				}
 				
-				console.log("[DEBUG] Final kelurahan coordinates (first 3):", kelurahanCoords.slice(0, 3));
-				
-				// Validate coordinates
-				const validCoords = kelurahanCoords.filter(([lat, lng]) => {
-					const validLat = lat >= -7.2 && lat <= -6.8;
-					const validLng = lng >= 110.2 && lng <= 110.6;
-					return validLat && validLng;
-				});
-				
-				console.log(`[DEBUG] Valid kelurahan coordinates: ${validCoords.length}/${kelurahanCoords.length}`);
 				setKelurahanPolygons([kelurahanCoords]);
 				setDistrictPolygon(null);
+
+				const geoJsonPolygon = turf.polygon([kelurahanCoords.map(([lat, lng]) => [lng, lat])]);
+				const centroid = turf.centroid(geoJsonPolygon);
+				const centerPoint = {
+					lat: centroid.geometry.coordinates[1],
+					lng: centroid.geometry.coordinates[0]
+				};
+				
+				console.log("[DEBUG] Kelurahan centroid:", centerPoint);
+				setUserPin(centerPoint);
+				setMapCenter([centerPoint.lat, centerPoint.lng]);
 
 				if (mapRef.current) {
 					const bounds = L.latLngBounds(kelurahanCoords);
