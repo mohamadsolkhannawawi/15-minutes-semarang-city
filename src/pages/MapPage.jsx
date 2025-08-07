@@ -845,7 +845,7 @@ const MapPage = () => {
 
 			setError(errorMessage);
 		} finally {
-			setIsSearchingRegion(false);
+			setIsLoading(false);
 		}
 	};
 
