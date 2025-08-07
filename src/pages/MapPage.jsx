@@ -124,6 +124,8 @@ const MapPage = () => {
 	const [error, setError] = useState(null);
 	const [locationMessage, setLocationMessage] = useState(null);
 	const [polygonCoords, setPolygonCoords] = useState([]);
+	const [districtPolygon, setDistrictPolygon] = useState(null);
+	const [kelurahanPolygons, setKelurahanPolygons] = useState([]);
 	const [isLandscape, setIsLandscape] = useState(
 		window.innerWidth > window.innerHeight
 	);
@@ -362,6 +364,16 @@ const MapPage = () => {
 			return () => clearTimeout(timer);
 		}
 	}, [locationMessage]);
+
+	useEffect(() => {
+		if (error) {
+			const timer = setTimeout(() => {
+				setError(null);
+			}, 4000); // ← 4 detik untuk error search
+
+			return () => clearTimeout(timer);
+		}
+	}, [error]);
 
 	const filteredFacilities = useMemo(() => {
 		if (activeFilter === "all") {
@@ -848,6 +860,177 @@ const MapPage = () => {
 		setPolygonCoords([]); // Kosongkan poligon saat reset
 	};
 
+	const handleSearch = async (query) => {
+		if (!query) return;
+
+		setIsLoading(true);
+		setError(null);
+		setDistrictPolygon(null);
+		setKelurahanPolygons([]);
+
+		let districtFound = false;
+
+		// --- PRIORITAS 1: MENCARI KECAMATAN ---
+		try {
+			// Log URL yang akan dipanggil untuk Kecamatan
+			console.log(`[DEBUG] Mencoba memanggil API Kecamatan: /districts/${query}`);
+			const districtResponse = await api.get(`/districts/${query}`);
+			console.log("[DEBUG] Panggilan API Kecamatan berhasil.", districtResponse);
+
+			if (districtResponse.data && districtResponse.data.polygon) {
+				districtFound = true;
+				const districtData = districtResponse.data;
+				
+				// 🔍 DEBUG: Log structure
+				console.log("🔍 [DEBUG] District polygon type:", districtData.polygon.type);
+				console.log("🔍 [DEBUG] District coordinates structure:", districtData.polygon.coordinates);
+				
+				// ✅ Handle MultiPolygon vs Polygon
+				let districtCoords;
+				if (districtData.polygon.type === "MultiPolygon") {
+					// MultiPolygon: coordinates[0][0] contains the actual coordinates
+					console.log("[DEBUG] Processing MultiPolygon district");
+					console.log("[DEBUG] Raw coordinates:", districtData.polygon.coordinates[0][0].slice(0, 3));
+					
+					districtCoords = districtData.polygon.coordinates[0][0].map(([lng, lat]) => {
+						console.log(`[DEBUG] District coord: lng=${lng}, lat=${lat}`);
+						return [lat, lng]; // Flip ke [lat, lng] untuk Leaflet
+					});
+				} else {
+					// Polygon: coordinates[0] contains the actual coordinates
+					console.log("[DEBUG] Processing Polygon district");
+					districtCoords = districtData.polygon.coordinates[0].map(([lng, lat]) => {
+						console.log(`[DEBUG] District coord: lng=${lng}, lat=${lat}`);
+						return [lat, lng]; // Flip ke [lat, lng] untuk Leaflet
+					});
+				}
+				
+				console.log("[DEBUG] Final district coordinates (first 3):", districtCoords.slice(0, 3));
+				setDistrictPolygon(districtCoords);
+
+				// Process kelurahan dengan logic yang sama
+				console.log(`[DEBUG] Processing ${districtData.kelurahans.length} kelurahans...`);
+				
+				const kelurahanCoords = districtData.kelurahans.map((k, index) => {
+					console.log(`[DEBUG] Processing kelurahan ${index}: ${k.name}`);
+					console.log(`[DEBUG] Kelurahan ${k.name} polygon type:`, k.polygon.type);
+					
+					let coords;
+					if (k.polygon.type === "MultiPolygon") {
+						// MultiPolygon: Handle multiple rings if exists
+						console.log(`[DEBUG] Kelurahan ${k.name} is MultiPolygon`);
+						console.log(`[DEBUG] Number of rings:`, k.polygon.coordinates.length);
+						
+						// Take the first (outer) ring: coordinates[0][0]
+						const outerRing = k.polygon.coordinates[0][0];
+						console.log(`[DEBUG] Kelurahan ${k.name} outer ring coordinates:`, outerRing.slice(0, 3));
+						
+						coords = outerRing.map(([lng, lat]) => {
+							return [lat, lng]; // Flip ke [lat, lng] untuk Leaflet
+						});
+					} else {
+						// Polygon: coordinates[0]
+						console.log(`[DEBUG] Kelurahan ${k.name} is Polygon`);
+						coords = k.polygon.coordinates[0].map(([lng, lat]) => {
+							return [lat, lng]; // Flip ke [lat, lng] untuk Leaflet
+						});
+					}
+					
+					console.log(`[DEBUG] Kelurahan ${k.name} final coordinates (first 3):`, coords.slice(0, 3));
+					
+					// Validate coordinates
+					const validCoords = coords.filter(([lat, lng]) => {
+						const validLat = lat >= -7.2 && lat <= -6.8;
+						const validLng = lng >= 110.2 && lng <= 110.6;
+						return validLat && validLng;
+					});
+					
+					console.log(`[DEBUG] Valid coords for ${k.name}: ${validCoords.length}/${coords.length}`);
+					
+					return coords;
+				});
+				
+				setKelurahanPolygons(kelurahanCoords);
+
+				if (mapRef.current) {
+					const bounds = L.latLngBounds(districtCoords);
+					mapRef.current.flyToBounds(bounds);
+				}
+			}
+		} catch (error) {
+			// Log error yang terjadi
+			console.error("[DEBUG] Error saat mencari Kecamatan:", error);
+
+			if (error.response && error.response.status === 404) {
+				console.log(`[DEBUG] Kecamatan "${query}" tidak ditemukan (404), melanjutkan ke pencarian kelurahan...`);
+			} else {
+				setError("Terjadi kesalahan pada server saat mencari kecamatan.");
+				setIsLoading(false);
+				return;
+			}
+		}
+
+		if (districtFound) {
+			console.log("[DEBUG] Kecamatan ditemukan, proses pencarian dihentikan.");
+			setIsLoading(false);
+			return;
+		}
+
+		// --- PRIORITAS 2: MENCARI KELURAHAN ---
+		try {
+			// Log URL yang akan dipanggil untuk Kelurahan
+			console.log(`[DEBUG] Mencoba memanggil API Kelurahan: /kelurahans/${query}`);
+			const kelurahanResponse = await api.get(`/kelurahans/${query}`);
+			console.log("[DEBUG] Panggilan API Kelurahan berhasil.", kelurahanResponse);
+
+			if (kelurahanResponse.data && kelurahanResponse.data.polygon) {
+				console.log("🔍 [DEBUG] Kelurahan polygon type:", kelurahanResponse.data.polygon.type);
+				console.log("🔍 [DEBUG] Kelurahan coordinates structure:", kelurahanResponse.data.polygon.coordinates);
+				
+				// ✅ Handle MultiPolygon vs Polygon untuk kelurahan
+				let kelurahanCoords;
+				if (kelurahanResponse.data.polygon.type === "MultiPolygon") {
+					console.log("[DEBUG] Processing MultiPolygon kelurahan");
+					console.log("[DEBUG] Raw coordinates:", kelurahanResponse.data.polygon.coordinates[0][0].slice(0, 3));
+					
+					kelurahanCoords = kelurahanResponse.data.polygon.coordinates[0][0].map(([lng, lat]) => {
+						console.log(`[DEBUG] Kelurahan coord: lng=${lng}, lat=${lat}`);
+						return [lat, lng]; // Flip ke [lat, lng] untuk Leaflet
+					});
+				} else {
+					console.log("[DEBUG] Processing Polygon kelurahan");
+					kelurahanCoords = kelurahanResponse.data.polygon.coordinates[0].map(([lng, lat]) => {
+						console.log(`[DEBUG] Kelurahan coord: lng=${lng}, lat=${lat}`);
+						return [lat, lng]; // Flip ke [lat, lng] untuk Leaflet
+					});
+				}
+				
+				console.log("[DEBUG] Final kelurahan coordinates (first 3):", kelurahanCoords.slice(0, 3));
+				
+				// Validate coordinates
+				const validCoords = kelurahanCoords.filter(([lat, lng]) => {
+					const validLat = lat >= -7.2 && lat <= -6.8;
+					const validLng = lng >= 110.2 && lng <= 110.6;
+					return validLat && validLng;
+				});
+				
+				console.log(`[DEBUG] Valid kelurahan coordinates: ${validCoords.length}/${kelurahanCoords.length}`);
+				setKelurahanPolygons([kelurahanCoords]);
+				setDistrictPolygon(null);
+
+				if (mapRef.current) {
+					const bounds = L.latLngBounds(kelurahanCoords);
+					mapRef.current.flyToBounds(bounds);
+				}
+			}
+		} catch (error) {
+			console.error("[DEBUG] Error saat mencari Kelurahan:", error);
+			setError("Kecamatan/Kelurahan tidak valid, pastikan memasukan yang ada di Kota Semarang");
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
 	return (
 		<div className="h-screen w-screen flex flex-col font-sans">
 			<header
@@ -885,10 +1068,10 @@ const MapPage = () => {
 							minWidth: "200px",
 						}}
 					>
-						<SearchBar
-							onSearch={(q) => console.log("Search:", q)}
-							onClear={() => console.log("Clear search")}
-						/>
+						<SearchBar onSearch={handleSearch} onClear={() => {
+							setDistrictPolygon(null);
+							setKelurahanPolygons([]);
+						}} />
 					</div>
 				</div>
 			</header>
@@ -1140,6 +1323,34 @@ const MapPage = () => {
 							))}
 						</>
 					)}
+
+					{districtPolygon && (
+                        <Polygon 
+                            pathOptions={{ 
+                                color: 'red', 
+                                weight: 4,        
+                                fillColor: 'red',
+                                fillOpacity: 0.1,
+                                opacity: 1        
+                            }} 
+                            positions={districtPolygon}
+                            zIndex={1000}
+                        />
+                    )}
+                    {kelurahanPolygons.map((kelurahan, index) => (
+                        <Polygon 
+                            key={index} 
+                            pathOptions={{ 
+                                color: 'blue', 
+                                weight: 2,      
+                                fillColor: 'blue',
+                                fillOpacity: 0.1, 
+                                opacity: 0.8      
+                            }} 
+                            positions={kelurahan}
+                            zIndex={500}
+                        />
+                    ))}
 				</MapContainer>
 
 				<div

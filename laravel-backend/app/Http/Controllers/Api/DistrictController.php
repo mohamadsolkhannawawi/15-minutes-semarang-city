@@ -32,6 +32,27 @@ class DistrictController extends Controller
     }
 
     /**
+     * Mencari ID kecamatan bedasarkan nama
+     */
+    public function showByName($name)
+    {
+        // 1. Cari hanya ID dari district berdasarkan nama (case-insensitive)
+        //    Menggunakan ->value('id') lebih efisien karena hanya mengambil satu nilai.
+        $districtId = DB::table('districts')
+            ->whereRaw('LOWER(name) = ?', [strtolower($name)])
+            ->value('id');
+
+        // 2. Jika ID tidak ditemukan, kembalikan error 404
+        if (!$districtId) {
+            return response()->json(['message' => 'District not found'], 404);
+        }
+
+        // 3. Jika ID ditemukan, panggil fungsi show() yang asli dengan ID tersebut.
+        //    $this->show() memanggil fungsi lain di dalam controller yang sama.
+        return $this->show($districtId);
+    }
+
+    /**
      * Tampilkan detail district beserta kelurahannya (dengan polygon)
      */
     public function show($id)
@@ -43,10 +64,12 @@ class DistrictController extends Controller
                 'name',
                 'persentase_penduduk',
                 'kepadatan_penduduk_per_km2',
-                DB::raw('ST_AsGeoJSON(polygon)::json as polygon')
+                DB::raw('ST_AsGeoJSON(polygon) as polygon_geojson')
             )
             ->where('id', $id)
             ->first();
+
+        $district->polygon = json_decode($district->polygon_geojson);
 
         if (!$district) {
             return response()->json(['message' => 'District not found'], 404);
@@ -58,11 +81,16 @@ class DistrictController extends Controller
                 'id',
                 'name',
                 'district_id',
-                DB::raw('ST_AsGeoJSON(polygon)::json as polygon')
+                DB::raw('ST_AsGeoJSON(polygon) as polygon_geojson')
             )
             ->where('district_id', $id)
             ->get();
 
+        $kelurahans->transform(function ($kelurahan) {
+            $kelurahan->polygon = json_decode($kelurahan->polygon_geojson);
+            return $kelurahan;
+        });
+        
         $district->kelurahans = $kelurahans;
 
         return response()->json($district);
