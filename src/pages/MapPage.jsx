@@ -122,6 +122,7 @@ const MapPage = () => {
 	const [isMobile, setIsMobile] = useState(window.innerWidth <= 810);
 	const [isLoading, setIsLoading] = useState(false);
 	const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+	const [isSearchingRegion, setIsSearchingRegion] = useState(false); 
 	const [error, setError] = useState(null);
 	const [locationMessage, setLocationMessage] = useState(null);
 	const [polygonCoords, setPolygonCoords] = useState([]);
@@ -844,7 +845,7 @@ const MapPage = () => {
 
 			setError(errorMessage);
 		} finally {
-			setIsLoading(false);
+			setIsSearchingRegion(false);
 		}
 	};
 
@@ -864,7 +865,7 @@ const MapPage = () => {
 	const handleSearch = async (query) => {
 		if (!query) return;
 
-		setIsLoading(true);
+		setIsSearchingRegion(true);
 		setError(null);
 		setDistrictPolygon(null);
 		setKelurahanPolygons([]);
@@ -938,14 +939,14 @@ const MapPage = () => {
 				console.log(`[DEBUG] Kecamatan "${query}" tidak ditemukan (404), melanjutkan ke pencarian kelurahan...`);
 			} else {
 				setError("Terjadi kesalahan pada server saat mencari kecamatan.");
-				setIsLoading(false);
+				setIsSearchingRegion(false);
 				return;
 			}
 		}
 
 		if (districtFound) {
 			console.log("[DEBUG] Kecamatan ditemukan, proses pencarian dihentikan.");
-			setIsLoading(false);
+			setIsSearchingRegion(false);
 			return;
 		}
 
@@ -988,7 +989,7 @@ const MapPage = () => {
 			console.error("[DEBUG] Error saat mencari Kelurahan:", error);
 			setError("Kecamatan/Kelurahan tidak valid, pastikan memasukan yang ada di Kota Semarang");
 		} finally {
-			setIsLoading(false);
+			setIsSearchingRegion(false);
 		}
 	};
 
@@ -1003,7 +1004,13 @@ const MapPage = () => {
 			// Hindari range merah (340-20 derajat)
 			(hue >= 340 || hue <= 20) ||
 			// Hindari range merah muda/pink (300-340 derajat) 
-			(hue >= 300 && hue <= 340)
+			(hue >= 300 && hue <= 340) ||
+			// Hindari range hijau (80-160 derajat)
+			(hue >= 80 && hue <= 160) ||
+			// Hindari lightness tinggi yang mendekati putih (> 70%)
+			(lightness > 70) ||
+			// Hindari saturation rendah yang mendekati abu-abu/putih (< 50%)
+			(saturation < 50)
 		);
 		
 		return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
@@ -1060,6 +1067,11 @@ const MapPage = () => {
 						<p className="text-white text-xl font-bold">Mencari Fasilitas...</p>
 					</div>
 				)}
+				{isSearchingRegion && (
+                    <div className="absolute inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+						<p className="text-white text-xl font-bold">Mencari Wilayah...</p>
+					</div>
+                )}
 				{error && (
 					<div className="absolute top-20 left-1/2 -translate-x-1/2 bg-red-500 text-white p-4 rounded-lg z-50 shadow-lg">
 						<p>{error}</p>
