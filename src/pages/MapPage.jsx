@@ -1064,12 +1064,20 @@ const MapPage = () => {
 			<main className="relative flex-grow">
 				{isLoading && (
 					<div className="absolute inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-						<p className="text-white text-xl font-bold">Mencari Fasilitas...</p>
+						<div className="flex flex-col items-center gap-4">
+							{/* Spinner Animation */}
+							<div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+							<p className="text-white text-xl font-bold">Mencari Fasilitas...</p>
+						</div>
 					</div>
 				)}
 				{isSearchingRegion && (
                     <div className="absolute inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-						<p className="text-white text-xl font-bold">Mencari Wilayah...</p>
+						<div className="flex flex-col items-center gap-4">
+							{/* Spinner Animation */}
+							<div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+							<p className="text-white text-xl font-bold">Mencari Wilayah...</p>
+						</div>
 					</div>
                 )}
 				{error && (
