@@ -992,6 +992,23 @@ const MapPage = () => {
 		}
 	};
 
+	const generateRandomKelurahanColor = () => {
+		let hue, saturation, lightness;
+		do {
+			// Generate HSL random
+			hue = Math.floor(Math.random() * 360);
+			saturation = Math.floor(Math.random() * 40) + 60; // 60-100% untuk warna yang vibrant
+			lightness = Math.floor(Math.random() * 20) + 45;  // 45-65% untuk tidak terlalu terang/gelap
+		} while (
+			// Hindari range merah (340-20 derajat)
+			(hue >= 340 || hue <= 20) ||
+			// Hindari range merah muda/pink (300-340 derajat) 
+			(hue >= 300 && hue <= 340)
+		);
+		
+		return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+	};
+
 	return (
 		<div className="h-screen w-screen flex flex-col font-sans">
 			<header
@@ -1298,20 +1315,24 @@ const MapPage = () => {
                             zIndex={1000}
                         />
                     )}
-                    {kelurahanPolygons.map((kelurahan, index) => (
-                        <Polygon 
-                            key={index} 
-                            pathOptions={{ 
-                                color: 'blue', 
-                                weight: 2,      
-                                fillColor: 'blue',
-                                fillOpacity: 0.1, 
-                                opacity: 0.8      
-                            }} 
-                            positions={kelurahan}
-                            zIndex={500}
-                        />
-                    ))}
+                    {kelurahanPolygons.map((kelurahan, index) => {
+					const randomColor = generateRandomKelurahanColor();
+					
+					return (
+						<Polygon 
+							key={index} 
+							pathOptions={{ 
+								color: randomColor,        
+								weight: 2,      
+								fillColor: randomColor,    
+								fillOpacity: 0.15,         
+								opacity: 0.8      
+							}} 
+							positions={kelurahan}
+							zIndex={500}
+						/>
+					);
+				})}
 				</MapContainer>
 
 				<div
