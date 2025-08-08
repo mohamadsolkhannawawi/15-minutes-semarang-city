@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import clsx from "clsx";
 
 // Import icon minimize/maximize dari folder assets
 import MinimizeIcon from "../../assets/icons/Minimize-Icon.svg";
@@ -27,7 +28,7 @@ const getIconForType = (type) => {
 	const iconMap = {
 		Kesehatan: KesehatanIcon,
 		Pendidikan: PendidikanIcon,
-		Ibadah: MasjidIcon, // Jika ingin lebih detail, bisa mapping ke Masjid/Gereja/Klenteng/Pura/Vihara sesuai kebutuhan
+		Ibadah: MasjidIcon,
 		Bandara: BandaraIcon,
 		Gereja: GerejaIcon,
 		Klenteng: KlentengIcon,
@@ -41,9 +42,7 @@ const getIconForType = (type) => {
 		Terminal: TerminalIcon,
 		Toko: TokoIcon,
 		Vihara: ViharaIcon,
-		// Tambahkan kategori lain jika ada
 	};
-
 	const selectedIcon = iconMap[type] || KesehatanIcon;
 	console.log('Selected icon for', type, ':', selectedIcon); // Debug log
 	return selectedIcon;
@@ -63,20 +62,24 @@ const SidePanel = ({
 		minimizePadding: "p-2",
 		maximizePadding: "p-2",
 		minimizedButtonSize: "60px",
-		headerFontSize: "text-base", // Default font size for headers
-		listFontSize: "text-sm", // Default font size for list items
-		infoFontSize: "text-sm", // Default font size for info text
+		headerFontSize: "text-base",
+		listFontSize: "text-sm",
+		infoFontSize: "text-sm",
 	});
+    // Menambah state untuk membedakan mobile portrait dan landscape
+    const [isMobile, setIsMobile] = useState(window.innerWidth <= 767);
+    const [isLandscape, setIsLandscape] = useState(window.innerWidth > window.innerHeight && window.innerWidth < 1024);
 
-	// Sistem responsif mirip MainPage
 	useEffect(() => {
 		const handleResize = () => {
 			const width = window.innerWidth;
 			const height = window.innerHeight;
-			const isLandscape = width > height;
+            const currentIsLandscape = width > height;
+            
+            setIsMobile(width <= 767);
+			setIsLandscape(currentIsLandscape && width < 1024); // Anggap landscape hanya untuk lebar di bawah 1024
 
-			if (isLandscape && width <= 926) {
-				// Landscape mobile - ukuran lebih kecil
+			if (currentIsLandscape && width <= 926) {
 				setResponsiveConfig({
 					minimizeIconSize: "w-4 h-4",
 					maximizeIconSize: "w-4 h-4",
@@ -90,7 +93,6 @@ const SidePanel = ({
 					marginTop: "8px",
 				});
 			} else if (width <= 375) {
-				// Keep existing mobile styles
 				setResponsiveConfig({
 					minimizeIconSize: "w-5 h-5",
 					maximizeIconSize: "w-5 h-5",
@@ -104,7 +106,6 @@ const SidePanel = ({
 					infoFontSize: "text-[10px]",
 				});
 			} else if (width <= 414) {
-				// Keep existing mobile styles
 				setResponsiveConfig({
 					minimizeIconSize: "w-6 h-6",
 					maximizeIconSize: "w-7 h-7",
@@ -118,7 +119,6 @@ const SidePanel = ({
 					infoFontSize: "text-[11px]",
 				});
 			} else {
-				// Keep all existing styles for other screen sizes
 				setResponsiveConfig({
 					minimizeIconSize: "w-5 h-5",
 					maximizeIconSize: "w-6 h-6",
@@ -141,30 +141,144 @@ const SidePanel = ({
 
 	const toggleMinimize = () => {
 		setIsMinimized(!isMinimized);
-		// Reset isMinimized when panel is closed
 		if (!isVisible) {
 			setIsMinimized(false);
 		}
 	};
 
-	// Add effect to reset minimize state when panel visibility changes
 	useEffect(() => {
 		if (!isVisible) {
 			setIsMinimized(false);
 		}
 	}, [isVisible]);
 
+    const renderHeader = () => (
+        <div className="relative bg-[#213448] rounded-tl-2xl px-4 py-3 flex items-center justify-center flex-shrink-0">
+            <span className={`text-white font-bold text-center ${responsiveConfig.headerFontSize}`}>
+                Informasi Area
+            </span>
+            <button onClick={toggleMinimize} className="p-2 rounded-full hover:bg-white/20 transition-colors absolute right-4" title="Minimize">
+                <img src={MinimizeIcon} alt="Minimize" style={{ width: 20, height: 20, filter: "brightness(0) invert(1)" }} />
+            </button>
+        </div>
+    );
+
+    const renderTitle = () => (
+        <div className="flex-shrink-0 mx-14 px-4 pt-4 pb-1">
+            <div className="flex justify-center">
+                <div className="p-3 rounded-lg mb-3 bg-brand-accent inline-block">
+                    <h2 className={`font-bold text-brand-dark-blue text-center whitespace-nowrap ${responsiveConfig.headerFontSize}`}>
+                        {facilities.length} Fasilitas Publik Ditemukan
+                    </h2>
+                </div>
+            </div>
+        </div>
+    );
+
+    const renderFacilityList = () => (
+        <div className="flex-grow min-h-0 overflow-y-auto px-4 pb-1">
+            <ul className="space-y-2">
+                {facilities.map((facility, index) => (
+                    <li key={facility.id}>
+                        <button onClick={() => onFacilitySelect(facility)} className="group flex items-center gap-3 hover:bg-white/50 p-3 rounded-lg transition-colors w-full text-left">
+                            <span className={`flex-shrink-0 w-6 text-center font-semibold text-brand-dark-blue ${responsiveConfig.listFontSize}`}>
+                                {index + 1}.
+                            </span>
+                            <img src={getIconForType(facility.type)} alt={facility.type} className="w-6 h-6 object-contain flex-shrink-0" />
+                            <span className={`flex-grow font-medium group-hover:underline text-brand-dark-blue ${responsiveConfig.listFontSize}`}>
+                                {facility.name}
+                            </span>
+                        </button>
+                    </li>
+                ))}
+            </ul>
+        </div>
+    );
+
+    const renderGeoInfo = () => (
+        <div className="flex-shrink-0">
+            <div className="mx-14 px-4 pt-4 pb-1">
+                <div className="flex justify-center">
+                    <div className="p-3 rounded-lg mb-2 bg-brand-accent inline-block">
+                        <h3 className={`font-semibold text-brand-dark-blue text-center whitespace-nowrap ${responsiveConfig.headerFontSize}`}>
+                            Detail Informasi Geografis
+                        </h3>
+                    </div>
+                </div>
+            </div>
+            <div className="px-4 pb-4">
+                <div className={`text-brand-dark-blue ${responsiveConfig.infoFontSize}`}>
+                    <div className="grid gap-1" style={{ gridTemplateColumns: "1rem auto auto 1fr", alignItems: "center" }}>
+                        <span></span><span className="font-bold">Kepadatan Penduduk /km²</span><span className="font-bold">:</span><span className="ml-1">{geoInfo.populationDensity}</span>
+                        <span></span><span className="font-bold">Kecamatan</span><span className="font-bold">:</span><span className="ml-1">{geoInfo.kecamatan}</span>
+                        <span></span><span className="font-bold">Kelurahan</span><span className="font-bold">:</span><span className="ml-1">{geoInfo.kelurahan}</span>
+                        <span></span><span className="font-bold">Persentase Penduduk</span><span className="font-bold">:</span><span className="ml-1">{geoInfo.population_percentage}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+
+    const renderDesktopContent = () => (
+        <div className="flex flex-col h-full relative">
+            {renderHeader()}
+            {renderTitle()}
+            {renderFacilityList()}
+            {renderGeoInfo()}
+        </div>
+    );
+
+    const renderMobileLandscapeContent = () => (
+        <div className="flex flex-col h-full relative">
+            {renderHeader()}
+            {renderTitle()}
+            <div className="flex-grow min-h-0 overflow-y-auto">
+                <div className="px-4 pb-1">
+                    <ul className="space-y-2">
+                        {facilities.map((facility, index) => (
+                           <li key={facility.id}>
+                               <button onClick={() => onFacilitySelect(facility)} className="group flex items-center gap-3 hover:bg-white/50 p-3 rounded-lg transition-colors w-full text-left">
+                                   <span className={`flex-shrink-0 w-6 text-center font-semibold text-brand-dark-blue ${responsiveConfig.listFontSize}`}>
+                                       {index + 1}.
+                                   </span>
+                                   <img src={getIconForType(facility.type)} alt={facility.type} className="w-6 h-6 object-contain flex-shrink-0" />
+                                   <span className={`flex-grow font-medium group-hover:underline text-brand-dark-blue ${responsiveConfig.listFontSize}`}>
+                                       {facility.name}
+                                   </span>
+                               </button>
+                           </li>
+                        ))}
+                    </ul>
+                </div>
+                {renderGeoInfo()}
+            </div>
+        </div>
+    );
+
+	const renderMainContent = () => {
+		// Kondisi Mobile Portrait
+		if (isMobile && !isLandscape) {
+			return renderDesktopContent(); // Mobile portrait menggunakan layout desktop dengan footer tetap
+		}
+		// Kondisi Mobile Landscape
+		else if (isLandscape) {
+			return renderMobileLandscapeContent(); // Hanya mobile landscape yang geo-info nya ikut scroll
+		}
+		// Kondisi Desktop & Tablet
+		else {
+			return renderDesktopContent(); // Desktop & tablet menggunakan layout footer tetap
+		}
+	};
+
+
 	return (
 		<>
-			{/* Overlay - hanya muncul saat panel tidak diminimize */}
 			{isVisible && !isMinimized && (
 				<div
 					className="fixed inset-0 bg-black/20 z-40 transition-opacity duration-300"
 					onClick={onClose}
 				/>
 			)}
-
-			{/* Panel utama */}
 			<div
 				className={`fixed right-0 z-50 shadow-2xl transition-all duration-300 ease-in-out ${
 					isVisible ? "translate-x-0" : "translate-x-full"
@@ -174,166 +288,21 @@ const SidePanel = ({
 					width: isMinimized ? responsiveConfig.minimizedButtonSize : "33.33vw",
 					backgroundColor: isMinimized ? "#2A3A4E" : "#9DB2C8",
 					borderRadius: isMinimized ? "50%" : "32px 0 0 32px",
-					marginTop: isMinimized
-						? "20px"
-						: responsiveConfig.marginTop || "clamp(8px, 1vh, 16px)",
+					marginTop: isMinimized ? "20px" : responsiveConfig.marginTop || "clamp(8px, 1vh, 16px)",
 					marginRight: isMinimized ? "20px" : "0",
-					minWidth: isMinimized
-						? responsiveConfig.minimizedButtonSize
-						: "280px", // Reduced from 320px for landscape
-					maxWidth: isMinimized
-						? responsiveConfig.minimizedButtonSize
-						: "600px",
+					minWidth: isMinimized ? responsiveConfig.minimizedButtonSize : "280px",
+					maxWidth: isMinimized ? responsiveConfig.minimizedButtonSize : "600px",
 					aspectRatio: isMinimized ? "1/1" : "auto",
-					height: isMinimized
-						? responsiveConfig.minimizedButtonSize
-						: `calc(100vh - ${
-								responsiveConfig.topPosition || "clamp(65px, 9vh, 110px)"
-						  })`,
+					height: isMinimized ? responsiveConfig.minimizedButtonSize : `calc(100vh - ${responsiveConfig.topPosition || "clamp(65px, 9vh, 110px)"})`,
 					flexShrink: isMinimized ? 0 : "auto",
 				}}
 			>
-				{/* Konten saat tidak diminimize */}
-				{!isMinimized && (
-					<div className="flex flex-col h-full relative">
-						{/* Header baru: hanya tombol minimize di kanan atas */}
-						<div className="relative bg-[#213448] rounded-tl-2xl px-4 py-3 flex items-center justify-center">
-							<span
-								className={`text-white font-bold text-center ${responsiveConfig.headerFontSize}`}
-							>
-								Informasi Area
-							</span>
-							<button
-								onClick={toggleMinimize}
-								className="p-2 rounded-full hover:bg-white/20 transition-colors absolute right-4"
-								title="Minimize"
-							>
-								<img
-									src={MinimizeIcon}
-									alt="Minimize"
-									style={{
-										width: 20,
-										height: 20,
-										filter: "brightness(0) invert(1)",
-									}}
-								/>
-							</button>
-						</div>
+				{!isMinimized && renderMainContent()}
 
-						{/* Judul di bawah header, di luar container biru */}
-						<div className="flex-shrink-0 mx-14 px-4 pt-4 pb-1">
-							<div className="flex justify-center">
-								<div className="p-3 rounded-lg mb-3 bg-brand-accent inline-block">
-									<h2
-										className={`font-bold text-brand-dark-blue text-center whitespace-nowrap ${responsiveConfig.headerFontSize}`}
-									>
-										{facilities.length} Fasilitas Publik Ditemukan
-									</h2>
-								</div>
-							</div>
-						</div>
-
-						{/* List fasilitas dengan background brand-accent */}
-						<div
-							className="overflow-y-auto px-4 pb-1"
-							style={{ maxHeight: "53vh" }}
-						>
-							<ul className="space-y-2">
-								{facilities.map((facility, index) => (
-									<li key={facility.id}>
-										<button
-											onClick={() => onFacilitySelect(facility)}
-											className="group flex items-center gap-3 hover:bg-white/50 p-3 rounded-lg transition-colors w-full text-left"
-										>
-											<span
-												className={`flex-shrink-0 w-6 text-center font-semibold text-brand-dark-blue ${responsiveConfig.listFontSize}`}
-											>
-												{index + 1}.
-											</span>
-											<img
-												src={getIconForType(facility.type)}
-												alt={facility.type}
-												className="w-6 h-6 object-contain flex-shrink-0"
-											/>
-											<span
-												className={`flex-grow font-medium group-hover:underline text-brand-dark-blue ${responsiveConfig.listFontSize}`}
-											>
-												{facility.name}
-											</span>
-										</button>
-									</li>
-								))}
-							</ul>
-						</div>
-
-						{/* Header Detail Informasi Geografis */}
-						<div className="flex-shrink-0 mx-14 px-4 pt-4 pb-1">
-							<div className="flex justify-center">
-								<div className="p-3 rounded-lg mb-2 bg-brand-accent inline-block">
-									<h3
-										className={`font-semibold text-brand-dark-blue text-center whitespace-nowrap ${responsiveConfig.headerFontSize}`}
-									>
-										Detail Informasi Geografis
-									</h3>
-								</div>
-							</div>
-						</div>
-
-						{/* Konten Detail Informasi Geografis */}
-						<div className="flex-shrink-0 px-4 pb-4">
-							<div
-								className={`text-brand-dark-blue ${responsiveConfig.infoFontSize}`}
-							>
-								<div
-									className="grid gap-1"
-									style={{
-										gridTemplateColumns: "1rem auto auto 1fr",
-										alignItems: "center",
-									}}
-								>
-									{/* Baris 1: Kepadatan Penduduk */}
-									<span></span>
-									<span className="font-bold">Kepadatan Penduduk /km²</span>
-									<span className="font-bold">:</span>
-									<span className="ml-1">{geoInfo.populationDensity}</span>
-
-									{/* Baris 2: Kecamatan */}
-									<span></span>
-									<span className="font-bold">Kecamatan</span>
-									<span className="font-bold">:</span>
-									<span className="ml-1">{geoInfo.kecamatan}</span>
-
-									{/* Baris 3: Kelurahan */}
-									<span></span>
-									<span className="font-bold">Kelurahan</span>
-									<span className="font-bold">:</span>
-									<span className="ml-1">{geoInfo.kelurahan}</span>
-
-									{/* Baris 4: Persentase Penduduk */}
-									<span></span>
-									<span className="font-bold">Persentase Penduduk</span>
-									<span className="font-bold">:</span>
-									<span className="ml-1">{geoInfo.population_percentage}</span>
-								</div>
-							</div>
-						</div>
-					</div>
-				)}
-
-				{/* Konten saat diminimize - icon maximize di tengah - RESPONSIF */}
 				{isMinimized && (
 					<div className="flex items-center justify-center h-full w-full">
-						<button
-							onClick={toggleMinimize}
-							className={`${responsiveConfig.maximizePadding} hover:bg-white/30 rounded-full transition-colors`}
-							title="Maximize"
-						>
-							<img
-								src={MaximizeIcon}
-								alt="Maximize"
-								className={responsiveConfig.maximizeIconSize}
-								style={{ filter: "brightness(0) invert(1)" }}
-							/>
+						<button onClick={toggleMinimize} className={`${responsiveConfig.maximizePadding} hover:bg-white/30 rounded-full transition-colors`} title="Maximize">
+							<img src={MaximizeIcon} alt="Maximize" className={responsiveConfig.maximizeIconSize} style={{ filter: "brightness(0) invert(1)" }}/>
 						</button>
 					</div>
 				)}

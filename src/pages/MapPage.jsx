@@ -7,6 +7,7 @@ import "leaflet/dist/leaflet.css";
 import clsx from "clsx";
 import * as turf from '@turf/turf';
 
+
 // Import CSS untuk mobile layout
 import "../styles/mobile.css";
 
@@ -16,6 +17,7 @@ import SidePanel from "../components/ui/SidePanel";
 import FacilityDetailCard from "../components/ui/FacilityDetailCard";
 import FacilityMarker from "../components/map/FacilityMarker";
 import MapEvents from "../components/map/MapEvents";
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 /*import { dummyGeographicInfo } from "../data/dummyData";*/
 
 // Fix ikon default
@@ -1065,21 +1067,31 @@ const MapPage = () => {
 				{isLoading && (
 					<div className="absolute inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
 						<div className="flex flex-col items-center gap-4">
-							{/* Spinner Animation */}
-							<div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+							<div className="w-24 h-24">
+								<DotLottieReact
+									src="https://lottie.host/0e9cf3ae-c8a4-45d7-98c7-91a6299984f4/LeOjdk2d4g.lottie"
+									loop
+									autoplay
+								/>
+							</div>
 							<p className="text-white text-xl font-bold">Mencari Fasilitas...</p>
 						</div>
 					</div>
 				)}
 				{isSearchingRegion && (
-                    <div className="absolute inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+					<div className="absolute inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
 						<div className="flex flex-col items-center gap-4">
-							{/* Spinner Animation */}
-							<div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+							<div className="w-24 h-24">
+								<DotLottieReact
+									src="https://lottie.host/0e9cf3ae-c8a4-45d7-98c7-91a6299984f4/LeOjdk2d4g.lottie"
+									loop
+									autoplay
+								/>
+							</div>
 							<p className="text-white text-xl font-bold">Mencari Wilayah...</p>
 						</div>
 					</div>
-                )}
+				)}
 				{error && (
 					<div className="absolute top-20 left-1/2 -translate-x-1/2 bg-red-500 text-white p-4 rounded-lg z-50 shadow-lg">
 						<p>{error}</p>
@@ -1385,27 +1397,14 @@ const MapPage = () => {
 					>
 						{isLoadingLocation ? (
 							<>
-								<svg
-									className="animate-spin -ml-1 mr-3 h-5 w-5 text-brand-dark-blue"
-									xmlns="http://www.w3.org/2000/svg"
-									fill="none"
-									viewBox="0 0 24 24"
-								>
-									<circle
-										className="opacity-25"
-										cx="12"
-										cy="12"
-										r="10"
-										stroke="currentColor"
-										strokeWidth="4"
-									></circle>
-									<path
-										className="opacity-75"
-										fill="currentColor"
-										d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-									></path>
-								</svg>
-								Mengambil Lokasi...
+								<div className="w-10 h-10 -ml-1 mr-1"> {/* Ukuran disesuaikan agar pas */}
+									<DotLottieReact
+										src="https://lottie.host/0e9cf3ae-c8a4-45d7-98c7-91a6299984f4/LeOjdk2d4g.lottie"
+										loop
+										autoplay
+									/>
+								</div>
+								<span>Mengambil Lokasi...</span>
 							</>
 						) : (
 							<>

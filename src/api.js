@@ -1,18 +1,9 @@
 // src/api.js
 import axios from "axios";
-
+const API_BASE_URL = import.meta.env.VITE_API_URL;
 // Fungsi untuk mendapatkan base URL API berdasarkan host
 const getApiBaseUrl = () => {
-	const host = window.location.hostname;
-	const port = "8000"; // Port Laravel backend
-
-	// Jika menggunakan localhost atau 127.0.0.1
-	if (host === "localhost" || host === "127.0.0.1") {
-		return `http://localhost:${port}/api`;
-	}
-
-	// Jika menggunakan network IP, gunakan IP yang sama
-	return `http://${host}:${port}/api`;
+	return API_BASE_URL;
 };
 
 // Buat instance axios
