@@ -5,6 +5,7 @@ import { MapContainer, TileLayer, Marker, Polygon } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import clsx from "clsx";
+import * as turf from '@turf/turf';
 
 // Import CSS untuk mobile layout
 import "../styles/mobile.css";
@@ -115,14 +116,18 @@ const MapPage = () => {
 	const [userPin, setUserPin] = useState(null);
 	const [showResults, setShowResults] = useState(false);
 	const [facilities, setFacilities] = useState([]);
+	const [geoInfo, setGeoInfo] = useState({}); 
 	const [selectedFacility, setSelectedFacility] = useState(null);
 	const [activeFilter, setActiveFilter] = useState("all");
 	const [isMobile, setIsMobile] = useState(window.innerWidth <= 810);
 	const [isLoading, setIsLoading] = useState(false);
 	const [isLoadingLocation, setIsLoadingLocation] = useState(false);
+	const [isSearchingRegion, setIsSearchingRegion] = useState(false); 
 	const [error, setError] = useState(null);
 	const [locationMessage, setLocationMessage] = useState(null);
 	const [polygonCoords, setPolygonCoords] = useState([]);
+	const [districtPolygon, setDistrictPolygon] = useState(null);
+	const [kelurahanPolygons, setKelurahanPolygons] = useState([]);
 	const [isLandscape, setIsLandscape] = useState(
 		window.innerWidth > window.innerHeight
 	);
@@ -362,6 +367,16 @@ const MapPage = () => {
 		}
 	}, [locationMessage]);
 
+	useEffect(() => {
+		if (error) {
+			const timer = setTimeout(() => {
+				setError(null);
+			}, 4000); // ← 4 detik untuk error search
+
+			return () => clearTimeout(timer);
+		}
+	}, [error]);
+
 	const filteredFacilities = useMemo(() => {
 		if (activeFilter === "all") {
 			return facilities;
@@ -391,6 +406,7 @@ const MapPage = () => {
 	const handleUseMyLocation = () => {
 		setIsLoadingLocation(true);
 		setError(null);
+		setLocationMessage(null);
 
 		console.log("🌐 Browser:", getBrowserInfo());
 		console.log("🌐 User Agent:", navigator.userAgent);
@@ -702,6 +718,27 @@ const MapPage = () => {
 			const { lat, lng } = userPin;
 			console.log(`📍 Lokasi dipilih: ${lat}, ${lng}`);
 
+			console.log("🌍 [Baru] Mengambil informasi wilayah...");
+			try {
+				const regionResponse = await api.post('/region-info', { lat, lng });
+				setGeoInfo({
+					populationDensity: `${regionResponse.data.population_density} /km²`,
+					kecamatan: regionResponse.data.kecamatan,
+					kelurahan: regionResponse.data.kelurahan,
+					population_percentage: `${regionResponse.data.population_percentage} %`,
+				});
+				console.log("✅ [Baru] Informasi wilayah diterima:", regionResponse.data);
+			} catch (regionError) {
+				console.warn("⚠️ Tidak dapat mengambil info wilayah, mungkin di luar jangkauan:", regionError.response?.data?.message);
+				// Reset info jika lokasi di luar jangkauan
+				setGeoInfo({
+					populationDensity: "N/A",
+					kecamatan: "Di luar area",
+					kelurahan: "Di luar area",
+					population_percentage: "N/A",
+				});
+			}
+
 			console.log("🔍 [1/5] Mengecek cache di database...");
 			const checkResult = await api.post("/walkability-zones/check", {
 				lat,
@@ -821,8 +858,162 @@ const MapPage = () => {
 		setShowResults(false);
 		setSelectedFacility(null);
 		setActiveFilter("all");
-		setFacilities([]); // Kosongkan fasilitas saat reset
-		setPolygonCoords([]); // Kosongkan poligon saat reset
+		setFacilities([]); 
+		setPolygonCoords([]); 
+	};
+
+	const handleSearch = async (query) => {
+		if (!query) return;
+
+		setIsSearchingRegion(true);
+		setError(null);
+		setDistrictPolygon(null);
+		setKelurahanPolygons([]);
+
+		let districtFound = false;
+
+		// --- PRIORITAS 1: MENCARI KECAMATAN ---
+		try {
+			// Log URL yang akan dipanggil untuk Kecamatan
+			console.log(`[DEBUG] Mencoba memanggil API Kecamatan: /districts/${query}`);
+			const districtResponse = await api.get(`/districts/${query}`);
+			console.log("[DEBUG] Panggilan API Kecamatan berhasil.", districtResponse);
+
+			if (districtResponse.data && districtResponse.data.polygon) {
+				districtFound = true;
+				const districtData = districtResponse.data;
+							
+				let districtCoords;
+				if (districtData.polygon.type === "MultiPolygon") {
+					
+					districtCoords = districtData.polygon.coordinates[0][0].map(([lng, lat]) => {
+						return [lat, lng]; // Flip ke [lat, lng] untuk Leaflet
+					});
+				} else {
+					districtCoords = districtData.polygon.coordinates[0].map(([lng, lat]) => {
+						return [lat, lng]; // Flip ke [lat, lng] untuk Leaflet
+					});
+				}
+				setDistrictPolygon(districtCoords);
+
+				const geoJsonPolygon = turf.polygon([districtCoords.map(([lat, lng]) => [lng, lat])]);
+				const centroid = turf.centroid(geoJsonPolygon);
+				const centerPoint = {
+					lat: centroid.geometry.coordinates[1],
+					lng: centroid.geometry.coordinates[0]
+				};
+
+				console.log("[DEBUG] District centroid:", centerPoint);
+				setUserPin(centerPoint);
+				setMapCenter([centerPoint.lat, centerPoint.lng]);
+				
+				const kelurahanCoords = districtData.kelurahans.map((k, index) => {
+					
+					let coords;
+					if (k.polygon.type === "MultiPolygon") {
+						const outerRing = k.polygon.coordinates[0][0];
+						coords = outerRing.map(([lng, lat]) => {
+							return [lat, lng]; // Flip ke [lat, lng] untuk Leaflet
+						});
+					} else {
+						coords = k.polygon.coordinates[0].map(([lng, lat]) => {
+							return [lat, lng]; // Flip ke [lat, lng] untuk Leaflet
+						});
+					}
+					
+					return coords;
+				});
+				
+				setKelurahanPolygons(kelurahanCoords);
+
+				if (mapRef.current) {
+					const bounds = L.latLngBounds(districtCoords);
+					mapRef.current.flyToBounds(bounds);
+				}
+			}
+		} catch (error) {
+			// Log error yang terjadi
+			console.error("[DEBUG] Error saat mencari Kecamatan:", error);
+
+			if (error.response && error.response.status === 404) {
+				console.log(`[DEBUG] Kecamatan "${query}" tidak ditemukan (404), melanjutkan ke pencarian kelurahan...`);
+			} else {
+				setError("Terjadi kesalahan pada server saat mencari kecamatan.");
+				setIsSearchingRegion(false);
+				return;
+			}
+		}
+
+		if (districtFound) {
+			console.log("[DEBUG] Kecamatan ditemukan, proses pencarian dihentikan.");
+			setIsSearchingRegion(false);
+			return;
+		}
+
+		// --- PRIORITAS 2: MENCARI KELURAHAN ---
+		try {
+			const kelurahanResponse = await api.get(`/kelurahans/${query}`);
+
+			if (kelurahanResponse.data && kelurahanResponse.data.polygon) {
+				let kelurahanCoords;
+				if (kelurahanResponse.data.polygon.type === "MultiPolygon") {	
+					kelurahanCoords = kelurahanResponse.data.polygon.coordinates[0][0].map(([lng, lat]) => {
+						return [lat, lng]; // Flip ke [lat, lng] untuk Leaflet
+					});
+				} else {
+					kelurahanCoords = kelurahanResponse.data.polygon.coordinates[0].map(([lng, lat]) => {
+						return [lat, lng]; // Flip ke [lat, lng] untuk Leaflet
+					});
+				}
+				
+				setKelurahanPolygons([kelurahanCoords]);
+				setDistrictPolygon(null);
+
+				const geoJsonPolygon = turf.polygon([kelurahanCoords.map(([lat, lng]) => [lng, lat])]);
+				const centroid = turf.centroid(geoJsonPolygon);
+				const centerPoint = {
+					lat: centroid.geometry.coordinates[1],
+					lng: centroid.geometry.coordinates[0]
+				};
+				
+				console.log("[DEBUG] Kelurahan centroid:", centerPoint);
+				setUserPin(centerPoint);
+				setMapCenter([centerPoint.lat, centerPoint.lng]);
+
+				if (mapRef.current) {
+					const bounds = L.latLngBounds(kelurahanCoords);
+					mapRef.current.flyToBounds(bounds);
+				}
+			}
+		} catch (error) {
+			console.error("[DEBUG] Error saat mencari Kelurahan:", error);
+			setError("Kecamatan/Kelurahan tidak valid, pastikan memasukan yang ada di Kota Semarang");
+		} finally {
+			setIsSearchingRegion(false);
+		}
+	};
+
+	const generateRandomKelurahanColor = () => {
+		let hue, saturation, lightness;
+		do {
+			// Generate HSL random
+			hue = Math.floor(Math.random() * 360);
+			saturation = Math.floor(Math.random() * 40) + 60; // 60-100% untuk warna yang vibrant
+			lightness = Math.floor(Math.random() * 20) + 45;  // 45-65% untuk tidak terlalu terang/gelap
+		} while (
+			// Hindari range merah (340-20 derajat)
+			(hue >= 340 || hue <= 20) ||
+			// Hindari range merah muda/pink (300-340 derajat) 
+			(hue >= 300 && hue <= 340) ||
+			// Hindari range hijau (80-160 derajat)
+			(hue >= 80 && hue <= 160) ||
+			// Hindari lightness tinggi yang mendekati putih (> 70%)
+			(lightness > 70) ||
+			// Hindari saturation rendah yang mendekati abu-abu/putih (< 50%)
+			(saturation < 50)
+		);
+		
+		return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
 	};
 
 	return (
@@ -862,10 +1053,10 @@ const MapPage = () => {
 							minWidth: "200px",
 						}}
 					>
-						<SearchBar
-							onSearch={(q) => console.log("Search:", q)}
-							onClear={() => console.log("Clear search")}
-						/>
+						<SearchBar onSearch={handleSearch} onClear={() => {
+							setDistrictPolygon(null);
+							setKelurahanPolygons([]);
+						}} />
 					</div>
 				</div>
 			</header>
@@ -873,9 +1064,22 @@ const MapPage = () => {
 			<main className="relative flex-grow">
 				{isLoading && (
 					<div className="absolute inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-						<p className="text-white text-xl font-bold">Mencari Fasilitas...</p>
+						<div className="flex flex-col items-center gap-4">
+							{/* Spinner Animation */}
+							<div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+							<p className="text-white text-xl font-bold">Mencari Fasilitas...</p>
+						</div>
 					</div>
 				)}
+				{isSearchingRegion && (
+                    <div className="absolute inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+						<div className="flex flex-col items-center gap-4">
+							{/* Spinner Animation */}
+							<div className="w-12 h-12 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+							<p className="text-white text-xl font-bold">Mencari Wilayah...</p>
+						</div>
+					</div>
+                )}
 				{error && (
 					<div className="absolute top-20 left-1/2 -translate-x-1/2 bg-red-500 text-white p-4 rounded-lg z-50 shadow-lg">
 						<p>{error}</p>
@@ -1117,6 +1321,38 @@ const MapPage = () => {
 							))}
 						</>
 					)}
+
+					{districtPolygon && (
+                        <Polygon 
+                            pathOptions={{ 
+                                color: 'red', 
+                                weight: 4,        
+                                fillColor: 'red',
+                                fillOpacity: 0.1,
+                                opacity: 1        
+                            }} 
+                            positions={districtPolygon}
+                            zIndex={1000}
+                        />
+                    )}
+                    {kelurahanPolygons.map((kelurahan, index) => {
+					const randomColor = generateRandomKelurahanColor();
+					
+					return (
+						<Polygon 
+							key={index} 
+							pathOptions={{ 
+								color: randomColor,        
+								weight: 2,      
+								fillColor: randomColor,    
+								fillOpacity: 0.15,         
+								opacity: 0.8      
+							}} 
+							positions={kelurahan}
+							zIndex={500}
+						/>
+					);
+				})}
 				</MapContainer>
 
 				<div
@@ -1268,7 +1504,7 @@ const MapPage = () => {
 				<SidePanel
 					isVisible={showResults && !selectedFacility}
 					facilities={filteredFacilities}
-					geoInfo={{}}
+					geoInfo={geoInfo}
 					onFacilitySelect={handleFacilitySelect}
 					onClose={resetView}
 				/>
