@@ -1,6 +1,6 @@
 // src/api.js
 import axios from "axios";
-const API_BASE_URL = import.meta.env.VITE_API_URL;
+const API_BASE_URL = "/api"
 // Fungsi untuk mendapatkan base URL API berdasarkan host
 const getApiBaseUrl = () => {
 	return API_BASE_URL;

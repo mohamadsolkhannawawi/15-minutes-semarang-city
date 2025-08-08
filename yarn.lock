@@ -1895,6 +1895,11 @@
   dependencies:
     csstype "^3.0.2"
 
+"@vitejs/plugin-basic-ssl@^2.1.0":
+  version "2.1.0"
+  resolved "https://registry.npmjs.org/@vitejs/plugin-basic-ssl/-/plugin-basic-ssl-2.1.0.tgz"
+  integrity sha512-dOxxrhgyDIEUADhb/8OlV9JIqYLgos03YorAueTIeOUskLJSEsfwCByjbu98ctXitUN3znXKp0bYD/WHSudCeA==
+
 "@vitejs/plugin-react@^4.6.0":
   version "4.6.0"
   resolved "https://registry.npmjs.org/@vitejs/plugin-react/-/plugin-react-4.6.0.tgz"
@@ -3484,7 +3489,7 @@ util-deprecate@^1.0.2:
   resolved "https://registry.npmjs.org/util-deprecate/-/util-deprecate-1.0.2.tgz"
   integrity sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==
 
-"vite@^4.2.0 || ^5.0.0 || ^6.0.0 || ^7.0.0-beta.0", vite@^7.0.3:
+"vite@^4.2.0 || ^5.0.0 || ^6.0.0 || ^7.0.0-beta.0", "vite@^6.0.0 || ^7.0.0", vite@^7.0.3:
   version "7.0.3"
   resolved "https://registry.npmjs.org/vite/-/vite-7.0.3.tgz"
   integrity sha512-y2L5oJZF7bj4c0jgGYgBNSdIu+5HF+m68rn2cQXFbGoShdhV1phX9rbnxy9YXj82aS8MMsCLAAFkRxZeWdldrQ==
